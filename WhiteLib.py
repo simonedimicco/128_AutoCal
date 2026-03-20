@@ -269,7 +269,7 @@ def measure(boxes, esposizione, durata):
 
 
 @njit(cache=True)
-def find_coincidences(t, c, window_ps, target_n):
+def find_coincidences_numba(t, c, window_ps, target_n):
     N = t.shape[0]
 
     # generation mask: mask[ch] == gen significa "ch visto in questa iterazione"
@@ -345,3 +345,7 @@ def sort_coincidences_descending(coincidences):
 
     return out
    
+def find_coincidences(t, c, window_ps, target_n):
+    coincidenses=find_coincidences_numba(t, c, window_ps, target_n)
+    coincidenses=sort_coincidences_descending(coincidenses)
+    return coincidenses
