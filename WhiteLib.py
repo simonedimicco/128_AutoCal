@@ -45,7 +45,7 @@ def T_sinc(TT1, CC1, TT2, CC2, ch1, ch2, window=100, mx=1e10):
 def merge_time_channel_arrays(times1, channels1, times2, channels2,
                                ch_sync_1, ch_sync_2, channel_offset=32):
 
-    # 1) Pre-filtraggio: maschera booleana → selezione vettoriale
+    # 1) Pre-filtraggio: maschera booleana ? selezione vettoriale
     mask1 = channels1 != ch_sync_1
     mask2 = channels2 != ch_sync_2
 
@@ -77,7 +77,7 @@ def merge_time_channel_arrays(times1, channels1, times2, channels2,
             j += 1
         k += 1
 
-    # 4) Tail: uno dei due array è esaurito, copia il resto
+    # 4) Tail: uno dei due array \Uffffffffsaurito, copia il resto
     while i < n1:
         merged_times[k]    = t1[i]
         merged_channels[k] = c1[i]
@@ -116,7 +116,7 @@ def modes_separator(channels_times, channels_list,
     c_out_buf = np.empty(n_total,    dtype=np.int64)
 
     # --- FASE 1: parallela su j ---
-    # Ogni iterazione è indipendente: searchsorted sostituisce trig_ptr
+    # Ogni iterazione \Uffffffffndipendente: searchsorted sostituisce trig_ptr
     for j in prange(n_total):
         ch = channels_list[j]
         if ch == trigger_channel:
@@ -124,8 +124,8 @@ def modes_separator(channels_times, channels_list,
 
         t_event = channels_times[j]
 
-        # Trova il trigger più recente con t_trig <= t_event
-        # searchsorted(..., 'right') - 1 dà l'indice del trigger immediatamente
+        # Trova il trigger pi\Uffffffffente con t_trig <= t_event
+        # searchsorted(..., 'right') - 1 d\Uffffffff'indice del trigger immediatamente
         # precedente o coincidente con t_event
         idx = np.searchsorted(trigger_times, t_event, side='right') - 1
 
@@ -231,6 +231,29 @@ def process_measurement(times, photons, trigger_channel=17, sync_ch_1=3, sync_ch
         return t_tot, c_tot
     del times_merged, channels_merged
     
+    if photons==1:
+        distribution = np.bincount(c_tot, minlength=128)
+    
+    if photons==2:
+        shape = (128,128)
+        order = np.argsort(t_tot)
+        t_sorted = t_tot[order]
+        c_sorted = c_tot[order]
+        window_ps = 1800
+        
+        coincidences = find_coincidences(t_sorted, c_sorted, window_ps, photons)
+        distribution = count_occurrences(shape=shape, data= coincidences)
+    if photons == 3:
+        order = np.argsort(t_tot)
+        t_sorted = t_tot[order]
+        c_sorted = c_tot[order]
+        window_ps = 1800
+        coincidences = find_coincidences(t_sorted, c_sorted, window_ps, photons)
+        coincidences = sort_coincidences_descending(coincidences)
+        return coincidences
+    # Process the data as needed
+    # For example, you could compute histograms, correlations, etc.
+    return distribution.flatten()
     
     # order = np.argsort(t_tot)
     # t_sorted = t_tot[order]
@@ -254,7 +277,7 @@ def find_coincidences(t, c, window_ps, target_n):
     gen  = 0
 
     max_out = N // target_n + 1
-    out_arr = np.empty((max_out, target_n), dtype=np.int64)
+    out_arr = np.zeros((max_out, target_n), dtype=np.int64)
     touched = np.empty(target_n, dtype=np.int64)
     n_found = 0
 
@@ -291,7 +314,34 @@ def find_coincidences(t, c, window_ps, target_n):
 
     return out_arr[:n_found]
 
+@njit
+def count_occurrences(shape, data):
+    key = np.zeros(shape, dtype=np.int64)
+    for row in data:
+        a = row[0]
+        b = row[1]
+        key[a, b] += 1
+        key[b, a] += 1
+    return key
 
-def hello():
-    print("Hello, World!")
+@njit(cache=True)
+def sort_coincidences_descending(coincidences):
+    n_found  = coincidences.shape[0]
+    target_n = coincidences.shape[1]
+    out = np.empty((n_found, target_n), dtype=np.int64)
+
+    for i in range(n_found):
+        # Copia la riga
+        for m in range(target_n):
+            out[i, m] = coincidences[i, m]
+        # Insertion sort decrescente (target_n piccolo ? ottimale)
+        for m in range(1, target_n):
+            key = out[i, m]
+            j = m - 1
+            while j >= 0 and out[i, j] < key:
+                out[i, j + 1] = out[i, j]
+                j -= 1
+            out[i, j + 1] = key
+
+    return out
    
