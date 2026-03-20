@@ -16,7 +16,7 @@ import time
 from numba import njit, prange
 from tqdm import tqdm
 from WhiteDict import *
-
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 @njit(cache=True)
 def T_sinc(TT1, CC1, TT2, CC2, ch1, ch2, window=100, mx=1e10):
@@ -227,14 +227,15 @@ def process_measurement(times, photons, trigger_channel=17, sync_ch_1=3, sync_ch
                                             window=window,
                                             offset=0
                                             )
+    del times_merged, channels_merged
+
     if photons==0:
         return t_tot, c_tot
-    del times_merged, channels_merged
     
-    if photons==1:
+    elif photons==1:
         distribution = np.bincount(c_tot, minlength=128)
     
-    if photons==2:
+    elif photons==2:
         shape = (128,128)
         order = np.argsort(t_tot)
         t_sorted = t_tot[order]
@@ -243,7 +244,7 @@ def process_measurement(times, photons, trigger_channel=17, sync_ch_1=3, sync_ch
         
         coincidences = find_coincidences(t_sorted, c_sorted, window_ps, photons)
         distribution = count_occurrences(shape=shape, data= coincidences)
-    if photons == 3:
+    elif photons == 3:
         order = np.argsort(t_tot)
         t_sorted = t_tot[order]
         c_sorted = c_tot[order]
@@ -349,3 +350,260 @@ def find_coincidences(t, c, window_ps, target_n):
     coincidenses=find_coincidences_numba(t, c, window_ps, target_n)
     coincidenses=sort_coincidences_descending(coincidenses)
     return coincidenses
+
+def control_volts(pairs):
+    """
+    Controlla ogni coppia in `pairs`: se uno dei due valori 0 o > 8,
+    stampa un errore e imposta la coppia a [0, 0].
+    """
+    for idx, (a, b) in enumerate(pairs):
+        # verifica se a o b sono fuori dall'intervallo 0\Uffffffff8
+        if not (0 <= a <= 8 and 0 <= b <= 8):
+            print(f"Errore: elementi fuori range in pairs[{idx}] = {pairs[idx]}")
+            return False
+    
+    return True
+
+def flatten_list(pairs):
+    # prende ogni coppia in pairs e ogni elemento x in quella coppia
+    return [x for pair in pairs for x in pair]
+
+def change_voltages(supply: PowerSupplies, volts) -> None:
+    assert isinstance(supply, PowerSupplies)
+    assert isinstance(volts, list)
+    assert supply._num_supplies==len(volts)
+    if control_volts(volts):  
+        volts = flatten_list(volts)
+        supply.voltages = volts
+        print('Volts changed ->' + str(supply.voltages))
+    else:
+        volts = [[0, 0] for _ in range(supply._num_supplies)]
+        supply.voltages = flatten_list(volts)
+        print('Volts reset to 0 due to error ->' + str(supply.voltages))
+
+def setloop(input):
+    '''channel_dict = {
+        'a': 0,
+        'b': 1,
+        'c': 2,
+        'd': 3,
+        'e': 4,
+        'f': 5
+    }'''
+    loop =[0,0,0,5]
+    for channel in input:
+        if channel != 0 and channel != 5:
+            loop[channel-1]=channel  
+
+    return loop
+
+def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_supplies: int, dmx: DMXController, boxes, exposition = 0.1, duration = 60, repetitions_singles=1, repetitions_doubles = 2) -> list:
+
+    if len(Voltages)!=n_supplies:
+        raise ValueError('Number of voltages does not match the number of supplies')
+    if type(Voltages)==np.ndarray:
+        Voltages = np.reshape(Voltages, (len(Voltages)//2, 2))
+    elif type(Voltages)== list:
+        Voltages = np.reshape(np.array(Voltages), (len(Voltages)//2, 2))
+    else:
+        raise ValueError('Voltages must be either list or numpy array')
+    
+    change_voltages(supply, Voltages)
+    output_list=[]
+
+    for input in inputs:
+
+       
+        ########################################################
+        #                                                      #
+        loop = setloop(input)
+        dmx.set_active_outputs(loop)
+        #                                                      #
+        ########################################################
+
+        photons= len(input)
+        if photons == 1:
+            n_measurments = repetitions_singles
+        elif photons == 2:
+            n_measurments = repetitions_doubles
+        partial_distribution = []
+        
+        for i in range(n_measurments):
+            if i==0:
+                measurement = measure(boxes, exposition, duration)
+            else:
+                with ProcessPoolExecutor() as executor:
+                    futures = {
+                            executor.submit(measure, boxes, exposition, duration): 'measure',
+                            executor.submit(process_measurement, measurement, photons=photons): 'process_measurement'
+                            }
+                    for future in as_completed(futures):
+                        task_name = futures[future]
+                        try:
+                            result = future.result()
+                            if task_name == 'measure':
+                                measurement_tmp = result
+                            elif task_name == 'process_measurement':
+                                partial_distribution.append(result)
+                        except Exception as e:
+                            print(f"Error in {task_name}: {e}")
+                    measurement = measurement_tmp #VERIFICARE CHE SIA UNA COPIA EFFETTIVA
+
+        result = process_measurement(measurement, photons=photons)
+        partial_distribution.append(result)
+        distribution = np.sum(np.array(partial_distribution), axis=0)
+        #distribution = np.concatenate(partial_distribution, axis = 0)
+        # QUI DEVI SOMMARE LE VARIE MISURE CONCATENATE PER LO STESSO INPUT
+        output_list.append(distribution)
+        dmx.stop_looping()
+    return np.array(output_list)
+
+'''
+FUNZIONI DENIS
+'''
+
+def UpdateParameter(currentValue, shiftValue, avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset):
+    currentValue = currentValue + shiftValue
+    if (avoidBoundary == False):
+        if (currentValue > parameterValueMax):
+            currentValue = parameterValueMax
+        if (currentValue < parameterValueMin):
+            currentValue = parameterValueMin
+    if (avoidBoundary == True):
+        if (currentValue > parameterValueMax):
+            currentValue = parameterValueMaxReset
+        if (currentValue < parameterValueMin):
+            currentValue = parameterValueMinReset
+    return currentValue
+
+# Funzioni modificate per il caso sperimentale.
+
+def lossEvalExp(parameters, inputs, target, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition):
+    tempPrediction = data_collection(inputs, np.sqrt(parameters), supply, Nsupp, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
+    tempLoss = MyMaeExp(tempPrediction, target)
+    #print(tempLoss)
+    return(tempLoss)
+
+def MyMaeExp(y_predicted, y_true):
+    total_error_arr = 0
+    for yp, yt in zip(y_predicted, y_true):
+        yp = (yp/np.sum(yp))
+        yt = (yt/np.sum(yt))
+        #print("yp: ", yp, "yt: ", yt)
+        total_error_arr += abs(yp - yt)
+    total_error = np.sum(total_error_arr)
+    #print("Total error is:",total_error)
+    mae = total_error/len(y_predicted)
+    #print("Mean absolute error is:",mae)
+    return mae
+# Funzione di training per il caso sperimentale.
+
+def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, repetitions_doubles, numParams, input_states_one, targetState1, input_states_two_full, targetState2_full, trainingParams, paramsUnitary = []):
+    epochsNum = trainingParams["epochsNum"]
+    LR_check = trainingParams["LR_check"]
+    LR_move = trainingParams["LR_move"]
+    useTwoPhotons = trainingParams["useTwoPhotons"]
+    typeTraining = trainingParams["typeTraining"]
+    typeOrder = trainingParams["typeOrder"]
+    printProgress = trainingParams["printProgress"]
+    checkPairsNum = trainingParams["checkPairsNum"]
+    firstNeighbourList = trainingParams["firstNeighbourList"]
+    avoidBoundary = trainingParams["avoidBoundary"]
+    supply = trainingParams["supply"]
+    Nsupp = trainingParams["Nsupp"]
+    boxes = trainingParams["boxes"]
+    exposition= trainingParams["exposition"]
+    parameterValueMin = trainingParams["parameterValueMin"]
+    parameterValueMax = trainingParams["parameterValueMax"]
+    parameterValueMaxReset = trainingParams["parameterValueMaxReset"]
+    parameterValueMinReset = trainingParams["parameterValueMinReset"]
+    paramsOrderList = np.arange(numParams)
+    bestLoss = 1000
+    maxPairs = len(input_states_two_full)
+    bestParams = np.zeros_like(currentParamsTrainable)
+    lossHistory = np.empty(epochsNum + 1)
+    #fidelityHistory = np.empty(epochsNum + 1)
+    
+    for epoch in range(epochsNum):
+        if (typeOrder == "allRandom"):
+            chosenParam = np.random.choice(numParams)
+        elif (typeOrder == "listRandom"):
+            if (epoch%numParams == 0):
+                np.random.shuffle(paramsOrderList)
+            chosenParam = paramsOrderList[epoch%numParams]
+        else:
+            print("ERROR, NO VALID ORDER TYPE SELECTED")
+
+        chosenPairs = np.random.choice(maxPairs, checkPairsNum, replace=False)
+        input_states_two = list( input_states_two_full[j] for j in chosenPairs )
+        targetState2 = np.zeros((checkPairsNum, len(targetState2_full[0])))
+        for j in range(checkPairsNum):
+            targetState2[j] = targetState2_full[chosenPairs[j]]
+
+        #print(input_states_two)
+        
+        #currentFidelity = MyFidelity(currentParamsTrainable, paramsNotTrainable, baseParamsTrainable, paramsNotTrainable, timeCoupling, sizeHam, paramsUnitary, paramsUnitary)
+        
+        prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)     #can be skipped if training step is equal to check step.
+        if (useTwoPhotons == True):
+            prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+        if (printProgress == "all"):
+            print("Epoch:", epoch)
+            print("Current loss is:", prevLoss,  "    Changed param:", chosenParam)
+            #print("Current loss is:", prevLoss, "    Current fidelity is:", currentFidelity, "    Changed param:", chosenParam)
+            print(chosenPairs)
+        #print("Current fidelity is:", currentFidelity) 
+        #print("Changed param:", chosenParam)
+        if (prevLoss < bestLoss):
+            bestLoss = prevLoss
+            bestParams = currentParamsTrainable.copy()
+        lossHistory[epoch] = prevLoss
+        #fidelityHistory[epoch] = currentFidelity
+        
+        
+        checkShift = prevLoss * LR_check
+        tempStore = currentParamsTrainable[chosenParam]
+        currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, checkShift, avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
+        #print(currentParamsTrainable)
+        upLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+        if (useTwoPhotons == True):
+            upLoss = upLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+        currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (-checkShift), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
+        downLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+        if (useTwoPhotons == True):
+            downLoss = downLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+        # calculating which direction to move
+        if ((upLoss < prevLoss) & (downLoss < prevLoss)):
+            if (downLoss < upLoss):
+                proportion = -1 * ((prevLoss - downLoss)/prevLoss)
+            else:
+                proportion = ((prevLoss - upLoss)/prevLoss)
+        elif(upLoss < prevLoss):
+            proportion = ((prevLoss - upLoss)/prevLoss)
+        elif(downLoss < prevLoss):
+            proportion = -1 * ((prevLoss - downLoss)/prevLoss)
+        else:
+            if (printProgress == "all"):
+                print("Changing parameter value does not improve loss")
+            proportion = 0
+        # moving in the decided direction based on training type
+        if (typeTraining == "proportional"):
+            currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (proportion*LR_move), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
+        elif (typeTraining == "absolute"):
+            currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (np.sign(proportion)*checkShift*LR_move/LR_check), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
+        else:
+            print("ERROR, NO VALID TRAINING TYPE SELECTED")
+    
+    prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+    if (useTwoPhotons == True):
+            prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+    #currentFidelity = MyFidelity(currentParamsTrainable, paramsNotTrainable, baseParamsTrainable, paramsNotTrainable, timeCoupling, sizeHam, paramsUnitary, paramsUnitary)
+    lossHistory[-1] = prevLoss
+    #fidelityHistory[-1] = currentFidelity
+    if (printProgress == "last" or printProgress == "all"):
+        #print("Last loss is:", prevLoss, "    Last fidelity is:", currentFidelity)
+        print("Last loss is:", prevLoss)
+    #return currentParamsTrainable, lossHistory, fidelityHistory, bestParams, bestLoss
+    return currentParamsTrainable, lossHistory, bestParams, bestLoss
+
+# Varie funzioni training.
