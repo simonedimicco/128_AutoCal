@@ -69,12 +69,12 @@ channel_f= 4
 channel_e= 5
 
 dmx = DMXController(log_level=logging.DEBUG)
-dmx.set_dwell_time(channel=channel_a, dwell_time=41)
-dmx.set_dwell_time(channel=channel_b, dwell_time=41)
-dmx.set_dwell_time(channel=channel_c, dwell_time=41)
-dmx.set_dwell_time(channel=channel_d, dwell_time=41)
-dmx.set_dwell_time(channel=channel_e, dwell_time=31)
-dmx.set_dwell_time(channel=channel_f, dwell_time=31)
+dmx.set_dwell_time(channel=channel_a, dwell_time=26)
+dmx.set_dwell_time(channel=channel_b, dwell_time=26)
+dmx.set_dwell_time(channel=channel_c, dwell_time=26)
+dmx.set_dwell_time(channel=channel_d, dwell_time=26)
+dmx.set_dwell_time(channel=channel_e, dwell_time=16)
+dmx.set_dwell_time(channel=channel_f, dwell_time=16)
 #%%
 '''
 SET WORKING DIRECTORY
