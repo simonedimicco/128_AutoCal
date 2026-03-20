@@ -23,13 +23,14 @@ from datetime import datetime
 strnow = lambda: datetime.now().strftime("%Y%m%d-%H%M%S")
 strtoday = lambda: datetime.now().strftime("%Y_%m_%d")
 strtimenow = lambda: datetime.now().strftime("%H:%M:%S")
+import time
 #%%
 '''
 FUNCTIONS SECTION:
 '''
 #%%
 def setloop(input):
-    loop =[0,0,0,5]
+    loop =[0,5,0,5]
     for channel in input:
         if channel != 0 and channel != 5:
             loop[channel-1]=channel  
@@ -105,29 +106,35 @@ channel_a= 0
 channel_b= 1
 channel_c= 2
 channel_d= 3
-channel_f= 4
-channel_e= 5
-
+channel_e= 4
+channel_f= 5
+#%%
 dmx = DMXController(log_level=logging.DEBUG)
-dmx.set_dwell_time(channel=channel_a, dwell_time=41)
-dmx.set_dwell_time(channel=channel_b, dwell_time=41)
-dmx.set_dwell_time(channel=channel_c, dwell_time=41)
-dmx.set_dwell_time(channel=channel_d, dwell_time=41)
-dmx.set_dwell_time(channel=channel_e, dwell_time=31)
-dmx.set_dwell_time(channel=channel_f, dwell_time=31)
+#%%
+dmx.stop_looping()
+#%%
+print(dmx.get_data())
+#%%
+dwell_time=24
+dmx.set_dwell_time(channel=channel_a, dwell_time=dwell_time)
+dmx.set_dwell_time(channel=channel_b, dwell_time=dwell_time)
+dmx.set_dwell_time(channel=channel_c, dwell_time=dwell_time)
+dmx.set_dwell_time(channel=channel_d, dwell_time=dwell_time)
+dmx.set_dwell_time(channel=channel_e, dwell_time=dwell_time)
+dmx.set_dwell_time(channel=channel_f, dwell_time=dwell_time)
 #%%
 '''
 SET WORKING DIRECTORY
 '''
 #%%
-path='C:/Users/ControlCenter/Desktop/Auto_calibration/'
+path='C:/Users/ControlCenter/Desktop/128_AutoCal/'
 dir_name = path+'DATI_' + strtoday()
 #dir_name = path+'misure_cluce_classica'
 import os
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 print(dir_name)
-save_path = os.path.join(dir_name, 'misura_' + strtimenow())
+save_path = dir_name
 #%%
 ''''
 EXPERIMENTAL SECTION
@@ -139,15 +146,16 @@ ripetizioni= int(durata/esposizione)
 n_epochs=10**3
 #%%
 
-Voltages=[0 for _ in range(len(addresses))]
+#Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
+inputs = [(1,2,3,4)]
 
 if __name__ == '__main__':
     for input in inputs:
         loop = setloop(input)
         dmx.set_active_outputs(loop)
         #change_voltages(supply, loop)
-        photons = len(input)
+        photons = 1# len(input)
         time.sleep(1)
         save_folder_processed = os.path.join(save_path, f'misura_{str(input)}_processed')
         if not os.path.exists(save_folder_processed):
@@ -155,10 +163,18 @@ if __name__ == '__main__':
         save_folder_raw = os.path.join(save_path, f'misura_{str(input)}_raw')
         if not os.path.exists(save_folder_raw):
             os.mkdir(save_folder_raw)
-        for i in range(2):
-            save_name_processed = os.path.join(save_folder_processed, f'misura__{i+1}.npz')
-            save_name_raw= os.path.join(save_folder_raw, f'misura__{i+1}.npz')
-            measurement = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
-            np.savez(save_name_raw, measurement=measurement)
-            result = process_measurement(measurement, photons=photons, name=save_name_processed)
+        for i in range(10):
+            save_name_processed = os.path.join(save_folder_processed, f'misura_{i+1}')
+            save_name_raw= os.path.join(save_folder_raw, f'misura_{i+1}')
+            measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+            #print(len(measure))
+            times = [(t,c) for t,c in measure]
+            times_box_1,channels_box_1 = times[0]
+            times_box_2,channels_box_2 = times[1]
+            np.savez(save_name_raw, times_box_1=times_box_1, channels_box_1=channels_box_1,times_box_2=times_box_2, channels_box_2=channels_box_2)
+            #result = process_measurement(times, photons=photons, name=save_name_processed)
         dmx.stop_looping()
+        time.sleep(1)
+#%%
+
+del dmx
