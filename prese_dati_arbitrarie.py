@@ -137,8 +137,7 @@ half = (n_bins // 2) * bin_width
 bin_edges = np.linspace(-half, half, n_bins + 1)
 centers = (np.arange(n_bins) - n_bins // 2) * bin_width
 n_pairs = n_channels // 2
-hist_totals_inter = np.zeros((n_pairs, n_bins), np.int64)
-hist_totals_intra = np.zeros((n_pairs, n_bins), np.int64)
+
 
 #%%
 esposizione = 0.1   #in secondi
@@ -159,7 +158,8 @@ for sequence in inputs:
     loop = setloop(sequence)
     dmx.set_active_outputs(loop)
     time.sleep(1)
-    
+    hist_totals_inter = np.zeros((n_pairs, n_bins), np.int64)
+    hist_totals_intra = np.zeros((n_pairs, n_bins), np.int64)
     for i in range(30):
         print(f'Singles measurement channel {names[sequence[0]-1]} {i+1}/30 - started at {strtimenow()}')
         measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
