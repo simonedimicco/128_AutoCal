@@ -133,6 +133,7 @@ parameterValueMinReset = 2
 #shotSize1 = int(1e4)
 #shotSize2 = int(1e4)
 duration=60
+exposition = 0.1
 repetitions_singles=1
 repetitions_doubles=2
 #typeTraining = "proportional"
