@@ -18,7 +18,7 @@ from numba import njit
 import time 
 import pyvisa as visa
 from tqdm import tqdm
-from WhiteLib import process_measurement, setloop, change_voltages
+from WhiteLib import process_measurement, setloop, change_voltages, split_times_by_channel, all_inter_histograms, all_intra_histograms
 from datetime import datetime
 strnow = lambda: datetime.now().strftime("%Y%m%d-%H%M%S")
 strtoday = lambda: datetime.now().strftime("%Y_%m_%d")
@@ -128,6 +128,19 @@ with open(os.path.join(path,dir_name) + '/'+"readme.txt", "w") as file:
 EXPERIMENTAL SECTION
 '''
 #%%
+#parametri istogrammi
+n_channels = 128
+bin_width = 400
+histo_width = 4 * 1e5
+n_bins = int(histo_width / bin_width)
+half = (n_bins // 2) * bin_width
+bin_edges = np.linspace(-half, half, n_bins + 1)
+centers = (np.arange(n_bins) - n_bins // 2) * bin_width
+n_pairs = n_channels // 2
+hist_totals_inter = np.zeros((n_pairs, n_bins), np.int64)
+hist_totals_intra = np.zeros((n_pairs, n_bins), np.int64)
+
+#%%
 esposizione = 0.1   #in secondi
 durata= 60   #in secondi
 ripetizioni= int(durata/esposizione)
@@ -155,7 +168,12 @@ for sequence in inputs:
         times_box_1,channels_box_1 = times[0]
         times_box_2,channels_box_2 = times[1]
         t_tot, c_tot = process_measurement(times, photons=0)
+        times_by_ch = split_times_by_channel(t_tot, c_tot, n_channels)
         np.savez(save_name_signal, t_tot=t_tot, c_tot=c_tot)
+        h_inter = all_inter_histograms(times_by_ch, n_channels, bin_width, n_bins)
+        h_intra = all_intra_histograms(times_by_ch, n_channels, bin_width, n_bins)
+        hist_totals_inter += h_inter
+        hist_totals_intra += h_intra
     dmx.stop_looping()
     time.sleep(1)
         

@@ -458,6 +458,93 @@ def setloop(input):
 #         dmx.stop_looping()
 #     return np.array(output_list)
 
+
+@njit
+def split_times_by_channel(times, channels, n_channels):
+    counts = np.zeros(n_channels, np.int64)
+    for ch in channels:
+        counts[ch] += 1
+
+    times_by_ch = [np.empty(counts[ch], np.int64) for ch in range(n_channels)]
+    idx = np.zeros(n_channels, np.int64)
+
+    for i in range(len(times)):
+        ch = channels[i]
+        times_by_ch[ch][idx[ch]] = times[i]
+        idx[ch] += 1
+
+    return times_by_ch
+
+@njit(parallel=True)
+def all_intra_histograms(times_by_ch, n_channels, bin_width, num_bins):
+    half = (num_bins // 2) * bin_width
+    n_pairs = n_channels // 2
+    hist_totals = np.zeros((n_pairs, num_bins), np.int64)
+
+    for pair in prange(n_pairs):
+        ch1 = pair * 2
+        t1s = times_by_ch[ch1]
+        n1 = t1s.shape[0]
+        ch2 = ch1 + 1
+
+        t2s = times_by_ch[ch2]
+        n2 = t2s.shape[0]
+
+        j_start = 0
+        j_end = 0
+
+        for i in range(n1):
+            t1 = t1s[i]
+
+            while j_start < n2 and t2s[j_start] < t1 - half:
+                j_start += 1
+            if j_end < j_start:
+                j_end = j_start
+            while j_end < n2 and t2s[j_end] <= t1 + half:
+                j_end += 1
+
+            for k in range(j_start, j_end):
+                delay = t2s[k] - t1
+                b = num_bins // 2 + int(delay // bin_width)
+                if 0 <= b < num_bins:
+                    hist_totals[pair, b] += 1
+    return hist_totals
+    
+@njit(parallel=True)
+def all_inter_histograms(times_by_ch, n_channels, bin_width, num_bins):
+    half = (num_bins // 2) * bin_width
+    n_pairs = n_channels // 2
+    hist_totals = np.zeros((n_pairs, num_bins), np.int64)
+
+    for pair in prange(n_pairs):
+        ch1 = 32
+        t1s = times_by_ch[ch1]
+        n1 = t1s.shape[0]
+        ch2 = 2 * pair
+
+        t2s = times_by_ch[ch2]
+        n2 = t2s.shape[0]
+
+        j_start = 0
+        j_end = 0
+
+        for i in range(n1):
+            t1 = t1s[i]
+
+            while j_start < n2 and t2s[j_start] < t1 - half:
+                j_start += 1
+            if j_end < j_start:
+                j_end = j_start
+            while j_end < n2 and t2s[j_end] <= t1 + half:
+                j_end += 1
+
+            for k in range(j_start, j_end):
+                delay = t2s[k] - t1
+                b = num_bins // 2 + int(delay // bin_width)
+                if 0 <= b < num_bins:
+                    hist_totals[pair, b] += 1
+    return hist_totals
+
 '''
 FUNZIONI DENIS
 '''
