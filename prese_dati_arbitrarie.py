@@ -162,20 +162,21 @@ for sequence in inputs:
     
     for i in range(30):
         print(f'Singles measurement channel {names[sequence[0]-1]} {i+1}/30 - started at {strtimenow()}')
-        save_name_signal = os.path.join(save_folder, f'misura_{i+1}')
         measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
         times = [(t,c) for t,c in measure]
         times_box_1,channels_box_1 = times[0]
         times_box_2,channels_box_2 = times[1]
         t_tot, c_tot = process_measurement(times, photons=0)
         times_by_ch = split_times_by_channel(t_tot, c_tot, n_channels)
-        np.savez(save_name_signal, t_tot=t_tot, c_tot=c_tot)
         h_inter = all_inter_histograms(times_by_ch, n_channels, bin_width, n_bins)
         h_intra = all_intra_histograms(times_by_ch, n_channels, bin_width, n_bins)
         hist_totals_inter += h_inter
         hist_totals_intra += h_intra
+        np.savez(os.path.join(save_folder, f'histo_intra_{names[sequence[0]-1]}.npz'), histogram=h_intra)
+        np.savez(os.path.join(save_folder, f'histo_inter_{names[sequence[0]-1]}.npz'), histogram=h_inter)
     dmx.stop_looping()
     time.sleep(1)
+
         
 #%%
 dmx.stop_looping()
