@@ -105,7 +105,7 @@ dmx.set_dwell_time(channel=channel_f, dwell_time=16)
 SET WORKING DIRECTORY
 '''
 #%%
-path='C:/Users/ControlCenter/Desktop/128_AutoCal/'
+path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
 dir_name = os.path.join(path,'DATI_' + strtoday())
 #dir_name = path+'misure_cluce_classica'
 if not os.path.exists(dir_name):
@@ -148,7 +148,7 @@ for sequence in inputs:
     time.sleep(1)
     
     for i in range(30):
-        print(f'Singles measurement channel {names[sequence[0]-1]} {i+1}/5 - started at {strtimenow()}')
+        print(f'Singles measurement channel {names[sequence[0]-1]} {i+1}/30 - started at {strtimenow()}')
         save_name_signal = os.path.join(save_folder, f'misura_{i+1}')
         measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
         times = [(t,c) for t,c in measure]
