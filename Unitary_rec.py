@@ -153,7 +153,7 @@ dmx.set_dwell_time(channel=channel_f, dwell_time=16)
 SET WORKING DIRECTORY
 '''
 #%%
-path='C:/Users/ControlCenter/Desktop/128_AutoCal/'
+path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
 dir_name = path+'DATI_' + strtoday()
 #dir_name = path+'misure_cluce_classica'
 import os
