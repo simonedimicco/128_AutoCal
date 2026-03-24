@@ -148,6 +148,7 @@ ripetizioni= int(durata/esposizione)
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,)]
+inputs = [(2,)]
 
 
 for sequence in inputs:
