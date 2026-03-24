@@ -172,8 +172,8 @@ for sequence in inputs:
         h_intra = all_intra_histograms(times_by_ch, n_channels, bin_width, n_bins)
         hist_totals_inter += h_inter
         hist_totals_intra += h_intra
-        np.savez(os.path.join(save_folder, f'histo_intra_{names[sequence[0]-1]}.npz'), histo_totals=h_intra, bin_edges=bin_edges)
-        np.savez(os.path.join(save_folder, f'histo_inter_{names[sequence[0]-1]}.npz'), histo_totals=h_inter,  bin_edges=bin_edges)
+        np.savez(os.path.join(save_folder, f'histo_intra_{names[sequence[0]-1]}.npz'), histo_totals=hist_totals_intra, bin_edges=bin_edges)
+        np.savez(os.path.join(save_folder, f'histo_inter_{names[sequence[0]-1]}.npz'), histo_totals=hist_totals_inter,  bin_edges=bin_edges)
     dmx.stop_looping()
     time.sleep(1)
 
