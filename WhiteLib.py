@@ -420,43 +420,51 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
     for input in inputs:
 
        
-        ########################################################
+        ####################  SET LOOP DMX  ####################
         #                                                      #
         loop = setloop(input)
         dmx.set_active_outputs(loop)
         #                                                      #
         ########################################################
 
+        #####  CHOOSE MEASUREMENTS NUMBER #######
         photons= len(input)
         if photons == 1:
             n_measurments = repetitions_singles
         elif photons == 2:
             n_measurments = repetitions_doubles
         partial_distribution = []
-        
-        for i in range(n_measurments):
-            if i==0:
-                measurement = measure(boxes, exposition, duration)
-            else:
-                with ProcessPoolExecutor() as executor:
-                    futures = {
-                            executor.submit(measure, boxes, exposition, duration): 'measure',
-                            executor.submit(process_measurement, measurement, photons=photons): 'process_measurement'
-                            }
-                    for future in as_completed(futures):
-                        task_name = futures[future]
-                        try:
-                            result = future.result()
-                            if task_name == 'measure':
-                                measurement_tmp = result
-                            elif task_name == 'process_measurement':
-                                partial_distribution.append(result)
-                        except Exception as e:
-                            print(f"Error in {task_name}: {e}")
-                    measurement = measurement_tmp #VERIFICARE CHE SIA UNA COPIA EFFETTIVA
+        #########################################
 
-        result = process_measurement(measurement, photons=photons)
-        partial_distribution.append(result)
+        ############  START MEASUREMENTS FOR AN INPUT  ############
+        for i in range(n_measurments):
+            # if i==0:
+            #     measurement = measure(boxes, exposition, duration)
+            # else:
+            #     with ProcessPoolExecutor() as executor:
+            #         futures = {
+            #                 executor.submit(measure, boxes, exposition, duration): 'measure',
+            #                 executor.submit(process_measurement, measurement, photons=photons): 'process_measurement'
+            #                 }
+            #         for future in as_completed(futures):
+            #             task_name = futures[future]
+            #             try:
+            #                 result = future.result()
+            #                 if task_name == 'measure':
+            #                     measurement_tmp = result
+            #                 elif task_name == 'process_measurement':
+            #                     partial_distribution.append(result)
+            #             except Exception as e:
+            #                 print(f"Error in {task_name}: {e}")
+            #         measurement = measurement_tmp #VERIFICARE CHE SIA UNA COPIA EFFETTIVA
+            measurement = measure(boxes, exposition, duration)
+            times = [(t,c) for t,c in measure]
+            t_i = time.time()
+            result = process_measurement(measurement, photons=photons)
+            t_f = time.time()
+            print(f"Measurement and processing for input {input} repetition {i+1}/{n_measurments} took {t_f - t_i:.2f} seconds")
+            partial_distribution.append(result)
+
         distribution = np.sum(np.array(partial_distribution), axis=0)
         #distribution = np.concatenate(partial_distribution, axis = 0)
         # QUI DEVI SOMMARE LE VARIE MISURE CONCATENATE PER LO STESSO INPUT

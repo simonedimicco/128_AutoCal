@@ -93,18 +93,24 @@ print(dir_name)
 TARGET DEFINITION
 '''
 #%%
-
+target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target'
+with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
+    targetSingles = data['distributions']
+with np.load(os.path.join(target_path, 'couples_distributions.npz')) as data:
+    targetDoubles = data['distributions']
 targetList = []
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/b.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/c.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/d.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/e.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/bc.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/bd.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/be.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/cd.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/ce.npz")["distribution"])
-targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/de.npz")["distribution"])
+targetList.append(distribution for distribution in targetSingles)
+targetList.append(distribution for distribution in targetDoubles)
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/b.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/c.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/d.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/e.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/bc.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/bd.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/be.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/cd.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/ce.npz")["distribution"])
+# targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/de.npz")["distribution"])
 
 for i in range(len(targetList)):
     targetList[i] = targetList[i].flatten()
