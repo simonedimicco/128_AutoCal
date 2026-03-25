@@ -587,7 +587,8 @@ def UpdateParameter(currentValue, shiftValue, avoidBoundary, parameterValueMin, 
 # Funzioni modificate per il caso sperimentale.
 
 def lossEvalExp(parameters, inputs, target, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition):
-    tempPrediction = data_collection(inputs, np.sqrt(parameters), supply, Nsupp, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
+    parameters_reshaped = np.reshape(parameters, (Nsupp, 2))
+    tempPrediction = data_collection(inputs, np.sqrt(parameters_reshaped), supply, Nsupp, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
     tempLoss = MyMaeExp(tempPrediction, target)
     #print(tempLoss)
     return(tempLoss)
