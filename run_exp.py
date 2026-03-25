@@ -80,7 +80,7 @@ dmx.set_dwell_time(channel=channel_f, dwell_time=16)
 SET WORKING DIRECTORY
 '''
 #%%
-path='C:/Users/ControlCenter/Desktop/128_AutoCal/'
+path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
 dir_name = path+'DATI_' + strtoday()
 #dir_name = path+'misure_cluce_classica'
 import os
@@ -97,10 +97,11 @@ target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target'
 with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
     targetSingles = data['distributions']
 with np.load(os.path.join(target_path, 'couples_distributions.npz')) as data:
-    targetDoubles = data['distributions']
-targetList = []
-targetList.append(distribution for distribution in targetSingles)
-targetList.append(distribution for distribution in targetDoubles)
+    targetDoubles_tmp= data['distributions']
+#targetList = []
+#targetList.append(distribution for distribution in targetSingles)
+#targetList.append(distribution for distribution in targetDoubles)
+#print(typetargetSingles)
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/b.npz")["distribution"])
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/c.npz")["distribution"])
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/singles_distribution/d.npz")["distribution"])
@@ -111,12 +112,15 @@ targetList.append(distribution for distribution in targetDoubles)
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/cd.npz")["distribution"])
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/ce.npz")["distribution"])
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/de.npz")["distribution"])
+targetDoubles = np.zeros((6, 16384), dtype=np.int64)
+#targetDoubles = np.reshape(targetDoubles, (6, 16384))
+for i in range(len(targetDoubles)):
+    targetDoubles[i] = targetDoubles_tmp[i].flatten()
+    
+print(targetDoubles[0, 0:20])
 
-for i in range(len(targetList)):
-    targetList[i] = targetList[i].flatten()
-
-targetSingles = np.array(targetList[0:4])
-targetDoubles = np.array(targetList[4:])
+'''targetSingles = np.array(targetList[0:4])
+targetDoubles = np.array(targetList[4:])'''
 
 #%%
 ''''
@@ -130,7 +134,7 @@ input_states_two_full = [(1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
 firstNeighbourList = input_states_two_full
 inputsFull = input_states_one + input_states_two_full
 
-numParams = len(addresses)
+numParams = len(addresses) * 2
 
 parameterValueMin = 0
 parameterValueMax = 64
@@ -138,10 +142,10 @@ parameterValueMaxReset = 62
 parameterValueMinReset = 2
 #shotSize1 = int(1e4)
 #shotSize2 = int(1e4)
-duration=60
+duration=6
 exposition = 0.1
 repetitions_singles=1
-repetitions_doubles=2
+repetitions_doubles=10
 #typeTraining = "proportional"
 typeTraining = "absolute"
 #typeOrder = "allRandom"
@@ -165,15 +169,26 @@ Nsupp = len(addresses)
 ### end of tweakable parameters
 trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset}
 
-
-#%%
-esposizione = 0.1   #in secondi
-durata= 60   #in secondi
-
 #%%
 
-#Voltages=[0 for _ in range(len(addresses))]
-#inputs = ['b', 'c', 'd', 'e', 'bc', 'bd', 'be', 'cd', 'ce', 'de']
+#volts[0]= [5.601,4.346]
+#volts[1]= [5.367,3.763]
+#volts[2]= [3.396,5.966]
+#volts[3]= [4.299,5.298]
+#volts[4]= [5.832,5.795]
+#volts[5]= [5.099,4.853]
+#volts[6]= [4.801,4.724]
+#volts[7]= [3.132,3.577]
+#volts[8]= [4.594,5.756]
+#volts[9]= [3.842,5.787]
+
+tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
+tempArr2 = tempArr + (np.random.rand(len(tempArr))) - 0.5
+print(tempArr2)
+currentParamsTrainable = tempArr2**2
+print(currentParamsTrainable)
+#%%
+
 
 currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, repetitions_doubles, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, trainingParams)
 
