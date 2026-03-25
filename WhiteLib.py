@@ -370,7 +370,7 @@ def flatten_list(pairs):
 
 def change_voltages(supply: PowerSupplies, volts) -> None:
     assert isinstance(supply, PowerSupplies)
-    assert isinstance(volts, list)
+    #assert isinstance(volts, list)
     assert supply._num_supplies==len(volts)
     if control_volts(volts):  
         volts = flatten_list(volts)
@@ -405,12 +405,12 @@ def setloop(input):
 
 def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_supplies: int, dmx: DMXController, boxes, exposition = 0.1, duration = 60, repetitions_singles=1, repetitions_doubles = 2) -> list:
 
-    if len(Voltages)!=n_supplies:
+    if len(Voltages)!=n_supplies*2:
         raise ValueError('Number of voltages does not match the number of supplies')
     if type(Voltages)==np.ndarray:
-        Voltages = np.reshape(Voltages, (len(Voltages)//2, 2))
+        Voltages = np.reshape(Voltages, (n_supplies, 2))
     elif type(Voltages)== list:
-        Voltages = np.reshape(np.array(Voltages), (len(Voltages)//2, 2))
+        Voltages = np.reshape(np.array(Voltages), (n_supplies, 2))
     else:
         raise ValueError('Voltages must be either list or numpy array')
     
@@ -586,9 +586,9 @@ def UpdateParameter(currentValue, shiftValue, avoidBoundary, parameterValueMin, 
 
 # Funzioni modificate per il caso sperimentale.
 
-def lossEvalExp(parameters, inputs, target, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition):
-    parameters_reshaped = np.reshape(parameters, (Nsupp, 2))
-    tempPrediction = data_collection(inputs, np.sqrt(parameters_reshaped), supply, Nsupp, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
+def lossEvalExp(parameters, inputs, target, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx):
+    #parameters_reshaped = np.reshape(parameters, (Nsupp, 2))
+    tempPrediction = data_collection(inputs, np.sqrt(parameters), supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
     tempLoss = MyMaeExp(tempPrediction, target)
     #print(tempLoss)
     return(tempLoss)
@@ -621,6 +621,7 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
     supply = trainingParams["supply"]
     Nsupp = trainingParams["Nsupp"]
     boxes = trainingParams["boxes"]
+    dmx = trainingParams["dmx"]
     exposition= trainingParams["exposition"]
     parameterValueMin = trainingParams["parameterValueMin"]
     parameterValueMax = trainingParams["parameterValueMax"]
@@ -653,9 +654,9 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         
         #currentFidelity = MyFidelity(currentParamsTrainable, paramsNotTrainable, baseParamsTrainable, paramsNotTrainable, timeCoupling, sizeHam, paramsUnitary, paramsUnitary)
         
-        prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)     #can be skipped if training step is equal to check step.
+        prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)     #can be skipped if training step is equal to check step.
         if (useTwoPhotons == True):
-            prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+            prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         if (printProgress == "all"):
             print("Epoch:", epoch)
             print("Current loss is:", prevLoss,  "    Changed param:", chosenParam)
@@ -674,13 +675,13 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         tempStore = currentParamsTrainable[chosenParam]
         currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, checkShift, avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
         #print(currentParamsTrainable)
-        upLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+        upLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         if (useTwoPhotons == True):
-            upLoss = upLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+            upLoss = upLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (-checkShift), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
-        downLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+        downLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         if (useTwoPhotons == True):
-            downLoss = downLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+            downLoss = downLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         # calculating which direction to move
         if ((upLoss < prevLoss) & (downLoss < prevLoss)):
             if (downLoss < upLoss):
@@ -703,9 +704,9 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         else:
             print("ERROR, NO VALID TRAINING TYPE SELECTED")
     
-    prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+    prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
     if (useTwoPhotons == True):
-            prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition)
+            prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
     #currentFidelity = MyFidelity(currentParamsTrainable, paramsNotTrainable, baseParamsTrainable, paramsNotTrainable, timeCoupling, sizeHam, paramsUnitary, paramsUnitary)
     lossHistory[-1] = prevLoss
     #fidelityHistory[-1] = currentFidelity
