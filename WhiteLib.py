@@ -265,8 +265,8 @@ def process_measurement(times, photons, trigger_channel=17, sync_ch_1=3, sync_ch
 
 def measure(boxes, esposizione, durata):
     ripetizioni= int(durata/esposizione)
-    mesure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
-    return mesure
+    measurement = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+    return measurement
 
 
 @njit(cache=True)
@@ -458,9 +458,9 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
             #                 print(f"Error in {task_name}: {e}")
             #         measurement = measurement_tmp #VERIFICARE CHE SIA UNA COPIA EFFETTIVA
             measurement = measure(boxes, exposition, duration)
-            times = [(t,c) for t,c in measure]
+            tags = [(t,c) for t,c in measurement]
             t_i = time.time()
-            result = process_measurement(measurement, photons=photons)
+            result = process_measurement(tags, photons=photons)
             t_f = time.time()
             print(f"Measurement and processing for input {input} repetition {i+1}/{n_measurments} took {t_f - t_i:.2f} seconds")
             partial_distribution.append(result)
