@@ -634,6 +634,9 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
     lossHistory = np.empty(epochsNum + 1)
     #fidelityHistory = np.empty(epochsNum + 1)
     
+    colorStart = '\033[92m'
+    colorStop = '\033[0m'
+    
     for epoch in range(epochsNum):
         if (typeOrder == "allRandom"):
             chosenParam = np.random.choice(numParams)
@@ -654,14 +657,20 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         
         #currentFidelity = MyFidelity(currentParamsTrainable, paramsNotTrainable, baseParamsTrainable, paramsNotTrainable, timeCoupling, sizeHam, paramsUnitary, paramsUnitary)
         
-        prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)     #can be skipped if training step is equal to check step.
+        print(colorStart, "Epoch:", epoch, "Measure 1", colorStop)
+        tempLoss1 = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)     #can be skipped if training step is equal to check step.
+        prevLoss = tempLoss1
         if (useTwoPhotons == True):
-            prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
+            tempLoss2 = lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
+            prevLoss = prevLoss + tempLoss2
         if (printProgress == "all"):
-            print("Epoch:", epoch)
-            print("Current loss is:", prevLoss,  "    Changed param:", chosenParam)
+            print(colorStart, "Epoch:", epoch, colorStop)
+            print(colorStart, "Current loss is:", prevLoss,  "    Changed param:", chosenParam,  "    Changed param value:", currentParamsTrainable[chosenParam], colorStop)
+            print(colorStart, "Loss Singles:", tempLoss1, colorStop)
+            if (useTwoPhotons == True):
+                print(colorStart, "Loss Doubles:", tempLoss2, colorStop)
             #print("Current loss is:", prevLoss, "    Current fidelity is:", currentFidelity, "    Changed param:", chosenParam)
-            print(chosenPairs)
+            print(colorStart, chosenPairs, colorStop)
         #print("Current fidelity is:", currentFidelity) 
         #print("Changed param:", chosenParam)
         if (prevLoss < bestLoss):
@@ -675,10 +684,12 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         tempStore = currentParamsTrainable[chosenParam]
         currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, checkShift, avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
         #print(currentParamsTrainable)
+        print(colorStart, "Epoch:", epoch, "Measure 2", colorStop)
         upLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         if (useTwoPhotons == True):
             upLoss = upLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (-checkShift), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
+        print(colorStart, "Epoch:", epoch, "Measure 3", colorStop)
         downLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
         if (useTwoPhotons == True):
             downLoss = downLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
@@ -694,7 +705,7 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
             proportion = -1 * ((prevLoss - downLoss)/prevLoss)
         else:
             if (printProgress == "all"):
-                print("Changing parameter value does not improve loss")
+                print(colorStart, "Changing parameter value does not improve loss", colorStop)
             proportion = 0
         # moving in the decided direction based on training type
         if (typeTraining == "proportional"):
@@ -703,7 +714,9 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
             currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (np.sign(proportion)*checkShift*LR_move/LR_check), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
         else:
             print("ERROR, NO VALID TRAINING TYPE SELECTED")
+        print(colorStart,  "Changed param value:", currentParamsTrainable[chosenParam], colorStop)
     
+    print(colorStart, "Epoch:", epoch, "Measure 4", colorStop)
     prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
     if (useTwoPhotons == True):
             prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
@@ -712,7 +725,7 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
     #fidelityHistory[-1] = currentFidelity
     if (printProgress == "last" or printProgress == "all"):
         #print("Last loss is:", prevLoss, "    Last fidelity is:", currentFidelity)
-        print("Last loss is:", prevLoss)
+        print(colorStart, "Last loss is:", prevLoss, colorStop)
     #return currentParamsTrainable, lossHistory, fidelityHistory, bestParams, bestLoss
     return currentParamsTrainable, lossHistory, bestParams, bestLoss
 
