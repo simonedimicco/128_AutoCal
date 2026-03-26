@@ -163,6 +163,7 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         print(colorStart,  "Changed param value:", currentParamsTrainable[chosenParam], colorStop)
     
     print(colorStart, "Epoch:", epoch, "Measure 4", colorStop)
+    print("Test2")
     prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
     if (useTwoPhotons == True):
             prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
