@@ -419,22 +419,34 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
 
     for input in inputs:
 
-       
+        
+        #####  CHOOSE MEASUREMENTS NUMBER #######
+        photons= len(input)
+        dark = False
+        if photons == 1:
+            n_measurments = repetitions_singles
+            dark = True
+        elif photons == 2:
+            n_measurments = repetitions_doubles
+        partial_distribution = []
+        #########################################
+        dark_distribution = np.zeros(128, dtype=np.int64)
+        if dark:
+            loop = setloop((0,))
+            dmx.set_active_outputs(loop)
+            for i in range(n_measurments):
+                measurement = measure(boxes, exposition, duration)
+                tags = [(t,c) for t,c in measurement]
+                # t_i = time.time()
+                result = process_measurement(tags, photons=photons)
+                # t_f = time.time()
+                dark_distribution += result
         ####################  SET LOOP DMX  ####################
         #                                                      #
         loop = setloop(input)
         dmx.set_active_outputs(loop)
         #                                                      #
         ########################################################
-
-        #####  CHOOSE MEASUREMENTS NUMBER #######
-        photons= len(input)
-        if photons == 1:
-            n_measurments = repetitions_singles
-        elif photons == 2:
-            n_measurments = repetitions_doubles
-        partial_distribution = []
-        #########################################
 
         ############  START MEASUREMENTS FOR AN INPUT  ############
         for i in range(n_measurments):
@@ -461,6 +473,8 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
             tags = [(t,c) for t,c in measurement]
             t_i = time.time()
             result = process_measurement(tags, photons=photons)
+            if dark:
+                result = result - dark_distribution
             t_f = time.time()
             print(f"Measurement and processing for input {input} repetition {i+1}/{n_measurments} took {t_f - t_i:.2f} seconds")
             partial_distribution.append(result)
