@@ -480,6 +480,7 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
             partial_distribution.append(result)
 
         distribution = np.sum(np.array(partial_distribution), axis=0)
+        
         #distribution = np.concatenate(partial_distribution, axis = 0)
         # QUI DEVI SOMMARE LE VARIE MISURE CONCATENATE PER LO STESSO INPUT
         output_list.append(distribution)

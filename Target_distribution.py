@@ -25,15 +25,17 @@ for i, channel in tqdm(enumerate(inputs), desc="Processing singles distributions
             B[i] += np.bincount(c_tot, minlength=128)
     B[i] = B[i]/len(files_dark)
 S = S - B
+for i in range(S.shape[0]):
+    S[i] = S[i]/np.sum(S[i])
 np.savez('singles_distributions.npz', distributions=S)
 
 couples = ['bc', 'bd', 'be', 'cd', 'ce', 'de']
 shape=(128,128)
 C = np.zeros((6, 128, 128), dtype=np.int64)
 for i, couple in tqdm(enumerate(couples), desc="Processing couples distributions", total=len(couples), ncols=100):
-    files_couples= [f for f in os.listdir(os.path.join(path, 'measurement_2ph_'+couple))]
+    files_couples= [f for f in os.listdir(os.path.join(path, 'Doppie' ,'measurement_2ph_'+couple))]
     for file in files_couples:
-        with np.load(os.path.join(path, 'measurement_2ph_'+couple, file)) as data:
+        with np.load(os.path.join(path, 'Doppie' ,'measurement_2ph_'+couple, file)) as data:
             c_tot = data['c_tot']
             t_tot = data['t_tot']
             order = np.argsort(t_tot)
@@ -43,5 +45,7 @@ for i, couple in tqdm(enumerate(couples), desc="Processing couples distributions
             print(f"File: {file}, Coincidences found: {len(coincidences)}")
             C[i] += count_occurrences(shape=shape,  data=coincidences)
 
+for i in range(C.shape[0]):
+    C[i] = C[i]/(np.sum(C[i])/2)
 np.savez('couples_distributions.npz', distributions=C)
             

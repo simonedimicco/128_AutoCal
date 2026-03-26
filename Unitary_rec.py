@@ -241,7 +241,7 @@ for sequence in inputs:
             times_box_1,channels_box_1 = times[0]
             times_box_2,channels_box_2 = times[1]
             t_tot, c_tot = process_measurement(times, photons=0)
-            np.savez(save_name_couples, t_tot=t_tot, c_tot=c_tot)
+            np.savez_compressed(save_name_couples, t_tot=t_tot, c_tot=c_tot)
         dmx.stop_looping()
         time.sleep(1)
         
