@@ -173,7 +173,6 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         #print("Last loss is:", prevLoss, "    Last fidelity is:", currentFidelity)
         print(colorStart, "Last loss is:", prevLoss, colorStop)
     #return currentParamsTrainable, lossHistory, fidelityHistory, bestParams, bestLoss
-    print("Test1")
     return currentParamsTrainable, lossHistory, bestParams, bestLoss
 
 # Varie funzioni training.
