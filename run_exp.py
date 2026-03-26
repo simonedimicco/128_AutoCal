@@ -203,6 +203,11 @@ currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(cu
 #for epoch in range(n_epochs):
     #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
+#set voltages to 0
+volts = [[0,0] for _ in range(len(addresses))]
+change_voltages(supply, volts)
+    
+
     
 #%%
 #%%
