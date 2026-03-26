@@ -147,7 +147,7 @@ parameterValueMaxReset = 62
 parameterValueMinReset = 2
 #shotSize1 = int(1e4)
 #shotSize2 = int(1e4)
-duration=6
+duration=60
 exposition = 0.1
 repetitions_singles=1
 repetitions_doubles=10
@@ -219,6 +219,6 @@ change_voltages(supply, volts)
     
         
 #%%
-
+print(targetSingles[1])
     
     

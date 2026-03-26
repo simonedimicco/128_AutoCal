@@ -42,8 +42,12 @@ def lossEvalExp(parameters, inputs, target, duration, repetitions_singles, repet
 def MyMaeExp(y_predicted, y_true):
     total_error_arr = 0
     for yp, yt in zip(y_predicted, y_true):
+        print("YP = ", yp)
+        print("YT = ", yt)
         yp = (yp/np.sum(yp))
         yt = (yt/np.sum(yt))
+        print("YP = ", yp)
+        print("YT = ", yt)
         #print("yp: ", yp, "yt: ", yt)
         total_error_arr += abs(yp - yt)
     total_error = np.sum(total_error_arr)
@@ -163,7 +167,6 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         print(colorStart,  "Changed param value:", currentParamsTrainable[chosenParam], colorStop)
     
     print(colorStart, "Epoch:", epoch, "Measure 4", colorStop)
-    print("Test2")
     prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
     if (useTwoPhotons == True):
             prevLoss = prevLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
