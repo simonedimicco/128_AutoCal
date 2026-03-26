@@ -475,6 +475,7 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
             result = process_measurement(tags, photons=photons)
             if dark:
                 result = result - dark_distribution
+                result[result < 0] = 0
             t_f = time.time()
             print(f"Measurement and processing for input {input} repetition {i+1}/{n_measurments} took {t_f - t_i:.2f} seconds")
             partial_distribution.append(result)
@@ -576,5 +577,5 @@ def all_inter_histograms(times_by_ch, n_channels, bin_width, num_bins):
 
 
 
-b= 1
+
 

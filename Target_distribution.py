@@ -25,6 +25,7 @@ for i, channel in tqdm(enumerate(inputs), desc="Processing singles distributions
             B[i] += np.bincount(c_tot, minlength=128)
     B[i] = B[i]/len(files_dark)
 S = S - B
+S[S < 0] = 0
 for i in range(S.shape[0]):
     S[i] = S[i]/np.sum(S[i])
 np.savez('singles_distributions.npz', distributions=S)
