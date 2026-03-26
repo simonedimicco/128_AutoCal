@@ -9,8 +9,8 @@ singles_folder = os.path.join(path, 'Singles')
 dark_folder = os.path.join(path, 'Buio')
 
 inputs = ['b', 'c', 'd', 'e']
-S = np.zeros((4, 128), dtype=np.int64)
-B = np.zeros((4, 128), dtype=np.int64)
+S = np.zeros((4, 128), dtype=np.float64)
+B = np.zeros((4, 128), dtype=np.float64)
 for i, channel in tqdm(enumerate(inputs), desc="Processing singles distributions", total=len(inputs), ncols=100):
     files_signles = [f for f in os.listdir(os.path.join(singles_folder, channel)) if f.endswith('.npz')]
     for file in files_signles:
@@ -31,7 +31,7 @@ np.savez('singles_distributions.npz', distributions=S)
 
 couples = ['bc', 'bd', 'be', 'cd', 'ce', 'de']
 shape=(128,128)
-C = np.zeros((6, 128, 128), dtype=np.int64)
+C = np.zeros((6, 128, 128), dtype=np.float64)
 for i, couple in tqdm(enumerate(couples), desc="Processing couples distributions", total=len(couples), ncols=100):
     files_couples= [f for f in os.listdir(os.path.join(path, 'Doppie' ,'measurement_2ph_'+couple))]
     for file in files_couples:

@@ -115,7 +115,7 @@ with np.load(os.path.join(target_path, 'couples_distributions.npz')) as data:
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/cd.npz")["distribution"])
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/ce.npz")["distribution"])
 # targetList.append(np.load("128_auto_calibration/dati_test/conf_03/Couple_coincidences_distributions/de.npz")["distribution"])
-targetDoubles = np.zeros((6, 16384), dtype=np.int64)
+targetDoubles = np.zeros((6, 16384), dtype=np.float64)
 #targetDoubles = np.reshape(targetDoubles, (6, 16384))
 for i in range(len(targetDoubles)):
     targetDoubles[i] = targetDoubles_tmp[i].flatten()
