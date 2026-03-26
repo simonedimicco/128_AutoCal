@@ -442,7 +442,9 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
                 # t_f = time.time()
                 dark_distribution += result
         ####################  SET LOOP DMX  ####################
-        #                                                      #
+        #                                
+        dmx.stop_looping()
+        time.sleep(0.1)                     #
         loop = setloop(input)
         dmx.set_active_outputs(loop)
         #                                                      #
@@ -486,6 +488,7 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
         # QUI DEVI SOMMARE LE VARIE MISURE CONCATENATE PER LO STESSO INPUT
         output_list.append(distribution)
         dmx.stop_looping()
+        time.sleep(0.1)
     return np.array(output_list)
 
 

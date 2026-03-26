@@ -134,6 +134,7 @@ currentParamsTrainable = [0 for _ in range(len(addresses))]
 
 #logging.disable()
 
+
 input_states_one = [(1,), (2,), (3,), (4,)]
 input_states_two_full = [(1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
 firstNeighbourList = input_states_two_full
@@ -147,7 +148,7 @@ parameterValueMaxReset = 62
 parameterValueMinReset = 2
 #shotSize1 = int(1e4)
 #shotSize2 = int(1e4)
-duration=60
+duration=6
 exposition = 0.1
 repetitions_singles=1
 repetitions_doubles=10
@@ -156,7 +157,8 @@ typeTraining = "absolute"
 #typeOrder = "allRandom"
 typeOrder = "listRandom"
 useTwoPhotons = False
-LR = 0.05
+LR = 1
+#LR = 0.05
 #LR = 0.005
 #LR = 0.01
 LR_check = LR
@@ -190,15 +192,24 @@ trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR
 
 tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
 #tempArr2 = tempArr + (np.random.rand(len(tempArr))) - 0.5
-tempArr2 = tempArr
+tempArr2 = tempArr**2
 print(tempArr2)
-currentParamsTrainable = tempArr2**2
+currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
 print(currentParamsTrainable)
 #%%
 
-logging.disable()
+strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+fileName = path + "logs/" + strnow_DS + "_128modi_training_target1.txt"
+logFile = open(fileName, 'w', encoding="utf-8")
 
-currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, repetitions_doubles, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, trainingParams)
+logFile.write("Training Start \n")
+logFile.write("Starting parameters: ")
+logFile.write(str(currentParamsTrainable))
+logFile.write("\n")
+
+logging.disable(logging.DEBUG)
+
+currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, repetitions_doubles, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, trainingParams)
 
 #for epoch in range(n_epochs):
     #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
@@ -207,10 +218,12 @@ currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(cu
 volts = [[0,0] for _ in range(len(addresses))]
 change_voltages(supply, volts)
     
-
+logFile.close()
     
 #%%
 #%%
+
+logFile.close()
 logging.disable(logging.DEBUG)
 dmx.stop_looping()
 #set voltages to 0

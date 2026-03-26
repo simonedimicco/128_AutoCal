@@ -42,12 +42,12 @@ def lossEvalExp(parameters, inputs, target, duration, repetitions_singles, repet
 def MyMaeExp(y_predicted, y_true):
     total_error_arr = 0
     for yp, yt in zip(y_predicted, y_true):
-        print("YP = ", yp)
-        print("YT = ", yt)
+        #print("YP = ", yp)
+        #print("YT = ", yt)
         yp = (yp/np.sum(yp))
         yt = (yt/np.sum(yt))
-        print("YP = ", yp)
-        print("YT = ", yt)
+        #print("YP = ", yp)
+        #print("YT = ", yt)
         #print("yp: ", yp, "yt: ", yt)
         total_error_arr += abs(yp - yt)
     total_error = np.sum(total_error_arr)
@@ -57,7 +57,7 @@ def MyMaeExp(y_predicted, y_true):
     return mae
 # Funzione di training per il caso sperimentale.
 
-def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, repetitions_doubles, numParams, input_states_one, targetState1, input_states_two_full, targetState2_full, trainingParams, paramsUnitary = []):
+def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, repetitions_doubles, numParams, input_states_one, targetState1, input_states_two_full, targetState2_full, logFile, trainingParams, paramsUnitary = []):
     epochsNum = trainingParams["epochsNum"]
     LR_check = trainingParams["LR_check"]
     LR_move = trainingParams["LR_move"]
@@ -121,6 +121,20 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
                 print(colorStart, "Loss Doubles:", tempLoss2, colorStop)
             #print("Current loss is:", prevLoss, "    Current fidelity is:", currentFidelity, "    Changed param:", chosenParam)
             print(colorStart, chosenPairs, colorStop)
+            
+        logFile.write("Epoch: ")
+        logFile.write(str(epoch))
+        logFile.write("    Current loss is: ")
+        logFile.write(str(prevLoss))
+        logFile.write("    Changed param: ")
+        logFile.write(str(chosenParam))
+        logFile.write("    Changed param start value: ")
+        logFile.write(str(currentParamsTrainable[chosenParam]))
+        logFile.write("    Loss Singles: ")
+        logFile.write(str(tempLoss1))
+        if (useTwoPhotons == True):
+            logFile.write("    Loss Doubles: ")
+            logFile.write(str(tempLoss2))
         #print("Current fidelity is:", currentFidelity) 
         #print("Changed param:", chosenParam)
         if (prevLoss < bestLoss):
@@ -165,6 +179,10 @@ def myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, rep
         else:
             print("ERROR, NO VALID TRAINING TYPE SELECTED")
         print(colorStart,  "Changed param value:", currentParamsTrainable[chosenParam], colorStop)
+        logFile.write("    Changed param end value: ")
+        logFile.write(str(currentParamsTrainable[chosenParam]))
+        logFile.write("\n")
+        logFile.flush()
     
     print(colorStart, "Epoch:", epoch, "Measure 4", colorStop)
     prevLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
