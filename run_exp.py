@@ -17,7 +17,8 @@ import numpy as np
 from numba import njit
 import time 
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-from WhiteLib import change_voltages, data_collection, myTrainingLoopExp
+from WhiteLib import change_voltages, data_collection
+from PurpleLib import myTrainingLoopExp
 import pyvisa as visa
 from tqdm import tqdm
 
