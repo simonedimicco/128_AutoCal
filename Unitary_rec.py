@@ -96,6 +96,23 @@ print(f'You are going to set the following voltages:')
 print(volts)
 #%%
 change_voltages(supply, volts)
+
+#%%
+# Target volts
+volts[0]= [5.601,4.346]
+volts[1]= [5.367,3.763]
+volts[2]= [3.396,5.966]
+volts[3]= [4.299,5.298]
+volts[4]= [5.832,5.795]
+volts[5]= [5.099,4.853]
+volts[6]= [4.801,4.724]
+volts[7]= [3.132,3.577]
+volts[8]= [4.594,5.756]
+volts[9]= [3.842,5.787]
+print(f'You are going to set the following voltages:')
+print(volts)
+#%%
+change_voltages(supply, volts)
 #%%
 '''
 INIZIALIZATION QU-TAGS
@@ -271,7 +288,9 @@ for sequence in inputs:
                 f.write(f"{tuple(int(x) for x in group)}\n")
     dmx.stop_looping()
     time.sleep(1)
-
+#%%
+volts = [[0,0] for _ in range(len(addresses))]
+change_voltages(supply, volts)
 
 #%%
 

@@ -149,12 +149,13 @@ names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,)]
 inputs = [(2,)]
-
+inputs = [(1,2,3,4)]
 
 for sequence in inputs:
     
     photons = len(sequence)
-    save_folder = os.path.join(dir_name,names[sequence[0]-1])
+    name = ''.join(names[i-1] for i in sequence)
+    save_folder = os.path.join(dir_name,name)
     os.makedirs(save_folder, exist_ok=True)
     loop = setloop(sequence)
     dmx.set_active_outputs(loop)
@@ -162,7 +163,7 @@ for sequence in inputs:
     hist_totals_inter = np.zeros((n_pairs, n_bins), np.int64)
     hist_totals_intra = np.zeros((n_pairs, n_bins), np.int64)
     for i in range(30):
-        print(f'Singles measurement channel {names[sequence[0]-1]} {i+1}/30 - started at {strtimenow()}')
+        print(f'Measurement channels {name} {i+1}/30 - started at {strtimenow()}')
         measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
         times = [(t,c) for t,c in measure]
         times_box_1,channels_box_1 = times[0]
@@ -173,8 +174,8 @@ for sequence in inputs:
         h_intra = all_intra_histograms(times_by_ch, n_channels, bin_width, n_bins)
         hist_totals_inter += h_inter
         hist_totals_intra += h_intra
-        np.savez(os.path.join(save_folder, f'histo_intra_{names[sequence[0]-1]}.npz'), histo_totals=hist_totals_intra, bin_edges=bin_edges)
-        np.savez(os.path.join(save_folder, f'histo_inter_{names[sequence[0]-1]}.npz'), histo_totals=hist_totals_inter,  bin_edges=bin_edges)
+        np.savez(os.path.join(save_folder, f'histo_intra_{name}.npz'), histo_totals=hist_totals_intra, bin_edges=bin_edges)
+        np.savez(os.path.join(save_folder, f'histo_inter_{name }.npz'), histo_totals=hist_totals_inter,  bin_edges=bin_edges)
     dmx.stop_looping()
     time.sleep(1)
 
