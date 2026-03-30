@@ -108,7 +108,8 @@ volts[6]= [24.09356394, 23.83949231]
 volts[7]= [12.50908916, 17.35610151] 
 volts[8]= [23.04587543, 28.30849853] 
 volts[9]= [11.9300337 , 30.21736944]
-volts = np.sqrt(volts)
+volts_array = list( np.sqrt(volts))
+volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
 print(volts)
 
@@ -186,7 +187,7 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday()
+dir_name = path+'DATI_' + strtoday() + '_pretraining'
 #dir_name = path+'misure_cluce_classica'
 import os
 if not os.path.exists(dir_name):
