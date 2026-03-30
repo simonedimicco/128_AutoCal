@@ -5,6 +5,7 @@ from WhiteLib_lite import find_coincidences_numba, count_occurrences
 
 
 path = '/media/dati_2/DATI_2026_03_24/Ricostruzione_unitaria'
+path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/DATI_2026_03_27/Ricostruzione_unitaria'
 singles_folder = os.path.join(path, 'Singles')
 dark_folder = os.path.join(path, 'Buio')
 
@@ -28,7 +29,7 @@ S = S - B
 S[S < 0] = 0
 for i in range(S.shape[0]):
     S[i] = S[i]/np.sum(S[i])
-np.savez('singles_distributions.npz', distributions=S)
+np.savez(os.path.join(path,'singles_distributions.npz'), distributions=S)
 
 couples = ['bc', 'bd', 'be', 'cd', 'ce', 'de']
 shape=(128,128)
@@ -48,5 +49,5 @@ for i, couple in tqdm(enumerate(couples), desc="Processing couples distributions
 
 for i in range(C.shape[0]):
     C[i] = C[i]/(np.sum(C[i])/2)
-np.savez('couples_distributions.npz', distributions=C)
+np.savez(os.path.join(path,'couples_distributions.npz'), distributions=C)
             

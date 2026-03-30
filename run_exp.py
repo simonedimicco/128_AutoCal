@@ -156,7 +156,7 @@ repetitions_doubles=10
 typeTraining = "absolute"
 #typeOrder = "allRandom"
 typeOrder = "listRandom"
-useTwoPhotons = False
+useTwoPhotons = True
 LR = 1
 #LR = 0.05
 #LR = 0.005
@@ -167,8 +167,8 @@ LR_move = LR
 epochsNum = 100
 trainingRepetitions = 10
 printProgress = "all"                     # "off", "last", "all"
-#checkPairsNum = 6
-checkPairsNum = 0
+checkPairsNum = 6
+#checkPairsNum = 0
 avoidBoundary = True
  
 Nsupp = len(addresses)
@@ -221,6 +221,11 @@ change_voltages(supply, volts)
 logFile.close()
     
 #%%
+
+savefileName = path + strnow_DS + "_128modi_training_target1_result_1.npz"
+
+np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
+
 #%%
 
 logFile.close()
@@ -233,5 +238,8 @@ change_voltages(supply, volts)
         
 #%%
 print(targetSingles[1])
-    
+
+#%%
+
+del dmx
     
