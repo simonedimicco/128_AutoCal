@@ -4,8 +4,8 @@ from tqdm import tqdm
 from WhiteLib_lite import find_coincidences_numba, count_occurrences
 
 
-path = '/media/dati_2/DATI_2026_03_24/Ricostruzione_unitaria'
-path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/DATI_2026_03_27/Ricostruzione_unitaria'
+path = '/media/dati_2/DATI_2026_03_30'
+#path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/DATI_2026_03_30'
 singles_folder = os.path.join(path, 'Singles')
 dark_folder = os.path.join(path, 'Buio')
 
@@ -35,9 +35,9 @@ couples = ['bc', 'bd', 'be', 'cd', 'ce', 'de']
 shape=(128,128)
 C = np.zeros((6, 128, 128), dtype=np.float64)
 for i, couple in tqdm(enumerate(couples), desc="Processing couples distributions", total=len(couples), ncols=100):
-    files_couples= [f for f in os.listdir(os.path.join(path, 'Doppie' ,'measurement_2ph_'+couple))]
+    files_couples= [f for f in os.listdir(os.path.join(path,'measurement_2ph_'+couple))]
     for file in files_couples:
-        with np.load(os.path.join(path, 'Doppie' ,'measurement_2ph_'+couple, file)) as data:
+        with np.load(os.path.join(path ,'measurement_2ph_'+couple, file)) as data:
             c_tot = data['c_tot']
             t_tot = data['t_tot']
             order = np.argsort(t_tot)

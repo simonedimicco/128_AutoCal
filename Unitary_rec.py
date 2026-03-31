@@ -98,6 +98,7 @@ print(volts)
 change_voltages(supply, volts)
 
 #%%
+#pretraining voltages
 volts[0]= [26.91770056, 20.25482259]
 volts[1]= [25.13671606, 12.33392859] 
 volts[2]= [14.39218764 ,38.11764358]
@@ -113,6 +114,20 @@ volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
 print(volts)
 
+#%%
+#aftertraining voltages
+volts[0]=[28.52133494, 19.29275721]
+volts[1]=[26.45806454, 12.33392859]
+volts[2]=[14.07755464, 39.44090354]
+volts[3]=[15.34390228, 28.40254952]
+volts[4]=[32.2095023 , 32.60211475]
+volts[5]=[26.81896368, 21.92135263]
+volts[6]=[23.63006376, 24.02677582]
+volts[7]=[12.10942377, 15.74827279]
+volts[8]=[22.66837316, 29.22583959]
+volts[9]=[13.56544436, 30.54044808]
+print(f'You are going to set the following voltages:')
+print(volts)
 #%%
 # Target volts
 volts[0]= [5.601,4.346]
