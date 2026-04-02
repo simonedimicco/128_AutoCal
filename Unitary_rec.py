@@ -87,7 +87,7 @@ supply = PowerSupplies(addresses)
 change_voltages(supply, volts)
 
 #%%
-raw = np.random.uniform(9, 36, size=len(addresses)*2)
+raw = np.random.uniform(0, 54, size=len(addresses)*2)
 # 2) trasformali con la radice quadrata → [0,8]
 volt_vals = np.sqrt(raw)
 # 3) rimodella in 6x2 e ottieni la list-of-lists
@@ -141,10 +141,24 @@ volts[4]= [5.832,5.795]
 volts[5]= [5.099,4.853]
 volts[6]= [4.801,4.724]
 volts[7]= [3.132,3.577]
-volts[8]= [4.594,5.756]
-volts[9]= [3.842,5.787]
+#volts[8]= [4.594,5.756]
+volts[8]= [4.594,0]
+#volts[9]= [3.842,5.787]
+volts[9]= [3.842,0]
+
 print(f'You are going to set the following voltages:')
 print(volts)
+#%%
+4.982, 6.744
+5.936, 4.612
+6.481, 5.619
+6.817, 4.076
+4.217, 2.074
+4.483, 5.363
+5.077, 1.618
+4.077, 7.307
+5.451, 1.067
+6.470, 6.944
 #%%
 change_voltages(supply, volts)
 #%%
@@ -205,7 +219,7 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_target'
+dir_name = path+'DATI_' + strtoday() + '_target_2'
 #dir_name = path+'misure_cluce_classica'
 import os
 if not os.path.exists(dir_name):
