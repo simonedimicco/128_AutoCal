@@ -301,7 +301,7 @@ for i in range(compSize):
 
 
 
-savefileName = path + strnow_DS + "_128modi_LossLandscape_target1_param0_1.npz"
+savefileName = path + strnow_DS + "_128modi_LossLandscape_target1_param0_2.npz"
 
 np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles)
 
