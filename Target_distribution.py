@@ -4,7 +4,7 @@ from tqdm import tqdm
 from WhiteLib_lite import find_coincidences_numba, count_occurrences
 
 
-path = '/media/dati_2/DATI_2026_03_30'
+path = '/media/dati_2/DATI_2026_04_03_target_2/Ricostruzione_unitaria'
 #path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/DATI_2026_03_30'
 singles_folder = os.path.join(path, 'Singles')
 dark_folder = os.path.join(path, 'Buio')
