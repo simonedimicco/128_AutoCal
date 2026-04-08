@@ -157,7 +157,8 @@ typeTraining = "absolute"
 #typeOrder = "allRandom"
 typeOrder = "listRandom"
 useTwoPhotons = True
-LR = 1
+LR = 5
+#LR = 1
 #LR = 0.05
 #LR = 0.005
 #LR = 0.01
@@ -190,16 +191,21 @@ trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR
 #volts[8]= [4.594,5.756]
 #volts[9]= [3.842,5.787]
 
-tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
-#tempArr2 = tempArr + (np.random.rand(len(tempArr))) - 0.5
+#tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
+
+tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
+
 tempArr2 = tempArr**2
 print(tempArr2)
-currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
+currentParamsTrainable = tempArr2
+#currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
+currentParamsTrainable[19] = 0.01
+currentParamsTrainable[17] = 0.01
 print(currentParamsTrainable)
 #%%
 
 strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-fileName = path + "logs/" + strnow_DS + "_128modi_training_target1.txt"
+fileName = path + "logs/" + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_2.txt"
 logFile = open(fileName, 'w', encoding="utf-8")
 
 logFile.write("Training Start \n")
@@ -215,7 +221,7 @@ currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(cu
     #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-savefileName = path + strnow_DS + "_128modi_training_target1_result_2.npz"
+savefileName = path + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_result_2.npz"
 
 np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
 
