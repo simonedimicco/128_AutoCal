@@ -18,7 +18,7 @@ from numba import njit
 import time 
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 from WhiteLib import change_voltages, data_collection
-from PurpleLib import myTrainingLoopExp, lossEvalExp
+from PurpleLib128Modes import myTrainingLoopExp, lossEvalExp
 import pyvisa as visa
 from tqdm import tqdm
 
@@ -148,6 +148,9 @@ parameterValueMaxReset = 62
 parameterValueMinReset = 2
 #shotSize1 = int(1e4)
 #shotSize2 = int(1e4)
+chipType = "128Modi"
+
+
 duration=6
 exposition = 0.1
 repetitions_singles=1
@@ -157,8 +160,8 @@ typeTraining = "absolute"
 #typeOrder = "allRandom"
 typeOrder = "listRandom"
 useTwoPhotons = True
-LR = 5
-#LR = 1
+#LR = 5
+LR = 1
 #LR = 0.05
 #LR = 0.005
 #LR = 0.01
@@ -176,7 +179,7 @@ Nsupp = len(addresses)
 
 
 ### end of tweakable parameters
-trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset}
+trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset, "chipType": chipType, "duration": duration, "repetitions_singles": repetitions_singles, "repetitions_doubles": repetitions_doubles}           
 
 #%%
 
@@ -191,37 +194,47 @@ trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR
 #volts[8]= [4.594,5.756]
 #volts[9]= [3.842,5.787]
 
-#tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
+#target1 params
+tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
 
-tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
+#target2 params
+#tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
 
 tempArr2 = tempArr**2
 print(tempArr2)
-currentParamsTrainable = tempArr2
-#currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
+#currentParamsTrainable = tempArr2
+currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
 currentParamsTrainable[19] = 0.01
 currentParamsTrainable[17] = 0.01
 print(currentParamsTrainable)
 #%%
 
 strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-fileName = path + "logs/" + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_2.txt"
+#fileName = path + "logs/" + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_2.txt"
+fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
 logFile = open(fileName, 'w', encoding="utf-8")
+fileNameExtended = path + "logs/" + strnow_DS + "_128modi_test_extended.txt"
+logFileExtended = open(fileNameExtended, 'w', encoding="utf-8")
 
-logFile.write("Training Start \n")
-logFile.write("Starting parameters: ")
-logFile.write(str(currentParamsTrainable))
-logFile.write("\n")
+outputString = "Training Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
+
+logFile.write(outputString)
+logFileExtended.write(outputString)
+
+logFile.flush()
+logFileExtended.flush()
 
 logging.disable(logging.DEBUG)
 
-currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, duration, repetitions_singles, repetitions_doubles, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, trainingParams)
+currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
+
+
 
 #for epoch in range(n_epochs):
     #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-savefileName = path + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_result_2.npz"
+savefileName = path + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_result_3.npz"
 
 np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
 
@@ -235,9 +248,9 @@ logFile.close()
 #%%
 # Da far girare se non si e' salvato prima
 
-savefileName = path + strnow_DS + "_128modi_training_target1_result_1.npz"
+#savefileName = path + strnow_DS + "_128modi_training_target1_result_1.npz"
 
-np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
+#np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
 
 #%%
 
