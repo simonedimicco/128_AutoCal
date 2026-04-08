@@ -9,16 +9,32 @@ class VoltageView:
         return self._p._link.v[key]
 
     def __setitem__(self, key, value):
-
-        if isinstance(value, (list, tuple, np.ndarray)):
-            for v, k in zip(value, key):
-                self._check(v)
-                self._check_front(v, k)
+            # trasformo key in lista di indici
+        if isinstance(key, slice):
+            keys = list(range(*key.indices(self._p._n_chs)))
+        elif isinstance(key, (list, tuple, np.ndarray)):
+            keys = list(key)
         else:
-            self._check(value)
-            self._check_front(value, key)
+            keys = [key]
 
-        self._p._link.v[key] = value
+        # trasformo value in lista
+        if isinstance(value, (list, tuple, np.ndarray)):
+            values = list(value)
+        else:
+            values = [value] * len(keys)
+
+        # check dimensioni
+        if len(keys) != len(values):
+            raise ValueError("key and value must have same length")
+
+        # check
+        for k, v in zip(keys, values):
+            self._check(v)
+            self._check_front(v, k)
+
+        # scrittura
+        for k, v in zip(keys, values):
+            self._p._link.v[k] = v
 
     def _check(self, value):
         if not isinstance(value, (int, float)):
@@ -33,10 +49,13 @@ class VoltageView:
         if not isinstance(value, (int, float)):
             raise ValueError("Voltage must be a number")
         
-        tmp = self._p._link.v
+        tmp = np.array(self._p._link.v,copy=True)
+        print(f"ora le tensioni sono: {tmp}")
+        n_ch = self._p._n_chs
         tmp[key] = value
-        for i in range(tmp//2):
-            if (tmp[i]>self._p._max and tmp[2*i]>0) or (tmp[2*i]>self._p._max and tmp[i]>0):
+        print(f"le tensioni target sono: {tmp}")
+        for i in range(n_ch//2):
+            if (tmp[i]>self._p._max_voltage and tmp[(i+n_ch//2)]>0.5) or (tmp[i+n_ch//2]>self._p._max_voltage and tmp[i]>0.5):
                 raise ValueError(f"You can excide the maximum voltage of {self._p._max_voltage}V only if the channel in front is set to 0V.")
             
 
@@ -48,7 +67,7 @@ class VoltageView:
 
     def __array__(self):
         return np.array(self._p._link.v)
-    
+
 class CurrentView:
     def __init__(self, parent):
         self._p = parent
@@ -58,34 +77,8 @@ class CurrentView:
 
     def __setitem__(self, key, value):
 
-        if isinstance(value, (list, tuple, np.ndarray)):
-            for i, k in zip(value, key):
-                self._check(i)
-                self._check_front(i, k)
-        else:
-            self._check(value)
-            self._check_front(value, key)
-
         self._p._link.i[key] = value
 
-    def _check(self, value):
-        if not isinstance(value, (int, float)):
-            raise ValueError("Current must be a number")
-
-        if value < self._p._min_current or value > self._p._max_current:
-            raise ValueError(
-                f"Current must be between {self._p._min_current} and {self._p._max_current}"
-            )
-
-    def _check_front(self, value, key):
-        if not isinstance(value, (int, float)):
-            raise ValueError("Current must be a number")
-        
-        tmp = self._p._link.i
-        tmp[key] = value
-        for i in range(tmp//2):
-            if (tmp[i]>self._p._max_current and tmp[2*i]>0) or (tmp[2*i]>self._p._max_current and tmp[i]>0):
-                raise ValueError(f"You can excide the maximum current of {self._p._max_current}A only if the channel in front is set to 0V.")
             
 
     def __len__(self):
@@ -100,11 +93,12 @@ class CurrentView:
 class QontrolPowerSupply():
     def __init__(self, address):
         self._link = qontrol.QXOutput(serial_port_name = address)
+        self._link.i[:]=100
         self._n_chs = self._link.n_chs
         self._min_voltage = 0
         self._max_voltage = 5
         self._max = 8
-        self._link.vmax= 8
+        self._link.vmax[:] = [8 for _ in range(self._link.n_chs)]
         if self._max_voltage > 5:
             print("Warning: The maximum voltage is set above 5V. Please ensure that your hardware can handle this voltage to avoid damage.")
         if self._max_voltage > self._max:
@@ -136,7 +130,7 @@ class QontrolPowerSupply():
         if len(values) != self._n_chs:
             raise ValueError(f"Voltage must be a list of {self._n_chs} values.")
         
-        self._link.v = values
+        self._link.v = values # Prima era self._link.v = values
         print(f"Voltage set to: {values}")
 
     
