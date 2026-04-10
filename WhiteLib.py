@@ -560,53 +560,29 @@ def data_collection_new(inputs: list, Voltages: list, supply: PowerSupplies, n_s
         partial_distribution = []
         loop = setloop(input)
         dmx.set_active_outputs(loop)
-        # for i in range(n_measurments):
-
-        #     #LA PRIMA ITERAZIONE PRENDE SOLO MISURE POICHÉ NON HO ANCORA DATI DA ELABORARE
-        #     if i==0:
-        #         tags_tmp = measure_tags(boxes, exposition, duration)
-
-        #     #DALLA SECONDA ITERAZIONE ELABORO I DATI DELLA MISURA PRECEDENTE MENTRE NE PRENDO UNA NUOVA IN PARALLELO, IN MODO DA OTTIMIZZARE I TEMPI
-        #     else:
-        #         with ProcessPoolExecutor() as executor:
-        #             futures = {
-        #                     executor.submit(measure_tags, boxes, exposition, duration): 'measure',
-        #                     executor.submit(process_measurement, tags, photons=photons): 'process_measurement'
-        #                     }
-        #             for future in as_completed(futures):
-        #                 task_name = futures[future]
-        #                 try:
-        #                     result = future.result()
-        #                     if task_name == 'measure':
-        #                         tags_tmp = result
-        #                     elif task_name == 'process_measurement':
-        #                         partial_distribution.append(result)
-        #                 except Exception as e:
-        #                     print(f"Error in {task_name}: {e}")
-
-        #     tags = tags_tmp #poiche quando viene assegnato un nuovo tags_tmp è un oggetto nuovo e indipendente da quello precedente, non c'è rischio di race condition
-        # result = process_measurement(tags, photons=photons)
-        # partial_distribution.append(result)
 
         with ProcessPoolExecutor() as executor:
             tags_prev = None
+            future_process = None
 
             for i in range(n_measurements):
 
-                # lancio SEMPRE la nuova misura
-                future_measure = executor.submit(measure_tags, boxes, exposition, duration)
-
+                # 1️⃣ lancio il processing precedente (se esiste)
                 if tags_prev is not None:
-                    # processo la misura precedente in parallelo
                     future_process = executor.submit(process_measurement, tags_prev, photons=photons)
 
+                # 2️⃣ faccio la nuova misura (mentre il processing gira!)
+                tags = measure_tags(boxes, exposition, duration)
+
+                # 3️⃣ ora recupero il risultato del processing precedente
+                if future_process is not None:
                     result = future_process.result()
                     partial_distribution.append(result)
 
-                # aspetto la nuova misura (serve per la prossima iterazione)
-                tags_prev = future_measure.result()
+                # aggiorno
+                tags_prev = tags
 
-            # dopo il loop manca l'ultima da processare
+            # ultima misura
             result = process_measurement(tags_prev, photons=photons)
             partial_distribution.append(result)
         distribution = np.sum(np.array(partial_distribution), axis=0)
