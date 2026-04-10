@@ -97,7 +97,8 @@ print(dir_name)
 TARGET DEFINITION
 '''
 #%%
-target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target'
+#target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target'
+target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_all20'
 with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
     targetSingles = data['distributions']
 with np.load(os.path.join(target_path, 'couples_distributions.npz')) as data:
@@ -210,7 +211,7 @@ print(currentParamsTrainable)
 #%%
 
 strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-#fileName = path + "logs/" + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_2.txt"
+#fileName = path + "logs/" + strnow_DS + "_128modi_training_target1_3Pairs_CloseStart_1.txt"
 fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
 logFile = open(fileName, 'w', encoding="utf-8")
 fileNameExtended = path + "logs/" + strnow_DS + "_128modi_test_extended.txt"
@@ -234,7 +235,7 @@ currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(cu
     #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-savefileName = path + strnow_DS + "_128modi_training_target1_6Pairs_RandomStart_result_3.npz"
+savefileName = path + strnow_DS + "_128modi_training_target1_3Pairs_CloseStart_result_1.npz"
 
 np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
 
@@ -288,7 +289,7 @@ costFluctuationSingles = np.zeros(compSize)
 costFluctuationDoubles = np.zeros(compSize)
 
 strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-fileName = path + "logs/" + strnow_DS + "_128modi_LossLandscape_target1_param0.txt"
+fileName = path + "logs/" + strnow_DS + "_128modi_LossLandscape_target1_param0_3.txt"
 logFile = open(fileName, 'w', encoding="utf-8")
 
 logFile.write("Starting parameters: ")
@@ -303,12 +304,12 @@ for i in range(compSize):
     logFile.write("Parameter Value: ")
     logFile.write(str(currentParamsTrainable[paramToCheck]))
     
-    costFluctuationSingles[i] = lossEvalExp(currentParamsTrainable, input_states_one, targetSingles, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
+    costFluctuationSingles[i] = lossEvalExp(currentParamsTrainable, input_states_one, targetSingles, trainingParams, chipType)
     
     logFile.write("    Loss Singles: ")
     logFile.write(str(costFluctuationSingles[i]))
     
-    costFluctuationDoubles[i] = lossEvalExp(currentParamsTrainable, input_states_two_full, targetDoubles, duration, repetitions_singles, repetitions_doubles, supply, Nsupp, boxes, exposition, dmx)
+    costFluctuationDoubles[i] = lossEvalExp(currentParamsTrainable, input_states_two_full, targetDoubles, trainingParams, chipType)
     
     logFile.write("    Loss Doubles: ")
     logFile.write(str(costFluctuationDoubles[i]))
@@ -320,7 +321,7 @@ for i in range(compSize):
 
 
 
-savefileName = path + strnow_DS + "_128modi_LossLandscape_target1_param0_2.npz"
+savefileName = path + strnow_DS + "_128modi_LossLandscape_target1_param0_3.npz"
 
 np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles)
 
@@ -333,6 +334,70 @@ logFile.write("Code execution completed successfully.\n")
 logFile.close()
 
 print("Loss Landscape completata con successo e salvati i risultati. Potete ora fare altre misure.")
+
+
+
+
+#%%
+
+
+compSize = 61
+
+
+currentParamsTrainable = np.ones(20)*2
+print(currentParamsTrainable)
+
+costFluctuationSingles = np.zeros(compSize)
+costFluctuationDoubles = np.zeros(compSize)
+
+strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+fileName = path + "logs/" + strnow_DS + "_128modi_LossLandscape_targetAll20_paramAll_1.txt"
+logFile = open(fileName, 'w', encoding="utf-8")
+
+logFile.write("Starting parameters: ")
+logFile.write(str(currentParamsTrainable))
+logFile.write("\n")
+logFile.flush()
+
+logging.disable(logging.DEBUG)
+
+
+for i in range(compSize):
+    logFile.write("Parameter Value: ")
+    logFile.write(str(currentParamsTrainable))
+    logFile.write("\n")
+    
+    costFluctuationSingles[i] = lossEvalExp(currentParamsTrainable, input_states_one, targetSingles, trainingParams, chipType)
+    
+    logFile.write("    Loss Singles: ")
+    logFile.write(str(costFluctuationSingles[i]))
+    
+    costFluctuationDoubles[i] = lossEvalExp(currentParamsTrainable, input_states_two_full, targetDoubles, trainingParams, chipType)
+    
+    logFile.write("    Loss Doubles: ")
+    logFile.write(str(costFluctuationDoubles[i]))
+    logFile.write("\n")
+    logFile.flush()
+    
+    currentParamsTrainable =  currentParamsTrainable + np.ones(20)
+    print(i)
+
+
+
+savefileName = path + strnow_DS + "_128modi_LossLandscape_targetAll20_paramAll_1.npz"
+
+np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles)
+
+#set voltages to 0
+volts = [[0,0] for _ in range(len(addresses))]
+change_voltages(supply, volts)
+
+logFile.write("Code execution completed successfully.\n")
+    
+logFile.close()
+
+print("Loss Landscape completata con successo e salvati i risultati. Potete ora fare altre misure.")
+
 
 
 #%%

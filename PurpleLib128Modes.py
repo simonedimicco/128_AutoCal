@@ -85,6 +85,8 @@ def MyMaeExp(y_predicted, y_true):
     mae = total_error/len(y_predicted)
     #print("Mean absolute error is:",mae)
     return mae
+
+
 # Funzione di training per il caso sperimentale.
 
 def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetState1, input_states_two_full, targetState2_full, logFile, logFileExtended, trainingParams, paramsUnitary = []):
@@ -149,7 +151,8 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
                 print(colorStart, chosenPairs, colorStop)
             #print("Current loss is:", prevLoss, "    Current fidelity is:", currentFidelity, "    Changed param:", chosenParam)
             
-        outputString = "Epoch: " + str(epoch) + "\n    Current loss is: " + str(prevLoss) + "    Changed param: " + str(chosenParam) + "    Changed param start value: " + str(currentParamsTrainable[chosenParam]) + "    Loss Singles: " + str(tempLoss1)
+        strnow = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        outputString = strnow + "\n Epoch: " + str(epoch) + "\n    Current loss is: " + str(prevLoss) + "    Changed param: " + str(chosenParam) + "    Changed param start value: " + str(currentParamsTrainable[chosenParam]) + "    Loss Singles: " + str(tempLoss1)
         logFile.write(outputString)
         logFileExtended.write(outputString)
 
@@ -158,7 +161,12 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
             logFile.write(str(tempLoss2))
             logFileExtended.write("    Loss Doubles: ")
             logFileExtended.write(str(tempLoss2))
+            logFileExtended.write("\n")
+            logFileExtended.write(str(chosenPairs))
 
+        logFile.write("\n")
+        logFileExtended.write("\n")
+        
         #print("Current fidelity is:", currentFidelity) 
         #print("Changed param:", chosenParam)
         if (prevLoss < bestLoss):
@@ -173,14 +181,34 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
         currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, checkShift, avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
         #print(currentParamsTrainable)
         print(colorStart, "Epoch:", epoch, "Measure 2", colorStop)
-        upLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, trainingParams, chipType)
+        tempLoss1 = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, trainingParams, chipType)
+        upLoss = tempLoss1
+        logFileExtended.write("upLoss Singles: ")
+        logFileExtended.write(str(tempLoss1))
         if (useTwoPhotons == True):
-            upLoss = upLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
+            tempLoss2 = lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
+            upLoss = upLoss + tempLoss2
+            logFileExtended.write("    upLoss Doubles: ")
+            logFileExtended.write(str(tempLoss2))
+        logFileExtended.write("    upLoss Total: ")
+        logFileExtended.write(str(upLoss))
+            
         currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (-checkShift), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
         print(colorStart, "Epoch:", epoch, "Measure 3", colorStop)
-        downLoss = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, trainingParams, chipType)
+        tempLoss1 = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, trainingParams, chipType)
+        downLoss = tempLoss1
+        logFileExtended.write("    downLoss Singles: ")
+        logFileExtended.write(str(tempLoss1))
         if (useTwoPhotons == True):
-            downLoss = downLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
+            tempLoss2 = downLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
+            downLoss = downLoss + tempLoss2
+            logFileExtended.write("    downLoss Doubles: ")
+            logFileExtended.write(str(tempLoss2))
+        logFileExtended.write("    downLoss Total: ")
+        logFileExtended.write(str(downLoss))
+        logFileExtended.write("\n")
+        
+        
         # calculating which direction to move
         if ((upLoss < prevLoss) & (downLoss < prevLoss)):
             if (downLoss < upLoss):
@@ -194,6 +222,8 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
         else:
             if (printProgress == "all"):
                 print(colorStart, "Changing parameter value does not improve loss", colorStop)
+            logFile.write("Changing parameter value does not improve loss \n")
+            logFileExtended.write("Changing parameter value does not improve loss \n")
             proportion = 0
         # moving in the decided direction based on training type
         if (typeTraining == "proportional"):
@@ -223,6 +253,14 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
     if (printProgress == "last" or printProgress == "all"):
         #print("Last loss is:", prevLoss, "    Last fidelity is:", currentFidelity)
         print(colorStart, "Last loss is:", prevLoss, colorStop)
+    logFile.write("Last Loss is: ")
+    logFile.write(str(prevLoss))
+    logFile.write("\n")
+    logFile.flush()
+    logFileExtended.write("Last Loss is: ")
+    logFileExtended.write(str(prevLoss))
+    logFileExtended.write("\n")
+    logFileExtended.flush()
     #return currentParamsTrainable, lossHistory, fidelityHistory, bestParams, bestLoss
     return currentParamsTrainable, lossHistory, bestParams, bestLoss
 

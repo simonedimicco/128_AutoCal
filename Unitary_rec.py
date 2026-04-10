@@ -242,7 +242,7 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_target_2'
+dir_name = path+'DATI_' + strtoday() + '_aftertraining'
 #dir_name = path+'misure_cluce_classica'
 import os
 if not os.path.exists(dir_name):
