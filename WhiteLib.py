@@ -12,6 +12,7 @@ import os
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import time
+import copy
 
 from numba import njit, prange
 from tqdm import tqdm
@@ -268,6 +269,12 @@ def measure(boxes, esposizione, durata):
     measurement = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
     return measurement
 
+def measure_tags(boxes, esposizione, durata):
+    ripetizioni= int(durata/esposizione)
+    measurement = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+    tags = [(t,c) for t,c in measurement]
+    return tags
+
 
 @njit(cache=True)
 def find_coincidences_numba(t, c, window_ps, target_n):
@@ -489,6 +496,124 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
         output_list.append(distribution)
         dmx.stop_looping()
         time.sleep(0.1)
+    return np.array(output_list)
+
+
+def data_collection_new(inputs: list, Voltages: list, supply: PowerSupplies, n_supplies: int, dmx: DMXController, boxes, exposition = 0.1, duration = 60, repetitions_singles=1, repetitions_doubles = 2) -> list:
+    '''
+        In qusta versione di data collection separo la collection in due parti a seconda che stiamo raccogliendo dati per singlos o doppie.
+        In questo modo posso parallelizzare la raccolta dati e l'elaborazione per le doppie.
+    '''
+    if len(Voltages)!=n_supplies*2:
+        raise ValueError('Number of voltages does not match the number of supplies')
+    if type(Voltages)==np.ndarray:
+        Voltages = np.reshape(Voltages, (n_supplies, 2))
+    elif type(Voltages)== list:
+        Voltages = np.reshape(np.array(Voltages), (n_supplies, 2))
+    else:
+        raise ValueError('Voltages must be either list or numpy array')
+    
+    change_voltages(supply, Voltages)
+    #misura e salva correnti e tensioni in un file di log
+    output_list=[]
+    singles_inputs = [input for input in inputs if len(input)==1]
+    doubles_inputs = [input for input in inputs if len(input)==2]
+
+    #PRESA DATI PER LE SINGOLE
+    n_measurments = repetitions_singles
+    photons = 1
+    for input in singles_inputs:
+        dark_distribution = np.zeros(128, dtype=np.int64)
+        single_distribution = np.zeros(128, dtype=np.int64)
+
+        #PRIMA MISURO IL DARK PER LE SINGOLE
+        loop = setloop((0,))
+        dmx.set_active_outputs(loop)
+        for i in range(n_measurments):
+            measurement = measure(boxes, exposition, duration)
+            tags = [(t,c) for t,c in measurement]
+            result = process_measurement(tags, photons=photons)
+            dark_distribution += result
+        dmx.stop_looping()
+        time.sleep(0.1)  
+
+        #QUI MISURO IL SEGNALE EFFETTIVO DELLE SINGOLE                   #
+        loop = setloop(input)
+        dmx.set_active_outputs(loop)
+        for i in range(n_measurments):
+            measurement = measure(boxes, exposition, duration)
+            tags = [(t,c) for t,c in measurement]
+            result = process_measurement(tags, photons=photons)
+            single_distribution += result
+        dmx.stop_looping()
+        time.sleep(0.1) 
+
+        #TOLGO IL RUMORE DI FONDO E AGGIUNGO LA DISTRIBUZIONE CORRISPONDENTE ALL'INPUT CORRENTE ALLA LISTA DEI RISULTATI
+        single_distribution = single_distribution - dark_distribution
+        single_distribution[single_distribution < 0] = 0
+        output_list.append(single_distribution)
+          
+    #PRESA DATI PER LE DOPPIE
+    n_measurements = repetitions_doubles
+    photons = 2
+    for input in doubles_inputs:
+        partial_distribution = []
+        loop = setloop(input)
+        dmx.set_active_outputs(loop)
+        # for i in range(n_measurments):
+
+        #     #LA PRIMA ITERAZIONE PRENDE SOLO MISURE POICHÉ NON HO ANCORA DATI DA ELABORARE
+        #     if i==0:
+        #         tags_tmp = measure_tags(boxes, exposition, duration)
+
+        #     #DALLA SECONDA ITERAZIONE ELABORO I DATI DELLA MISURA PRECEDENTE MENTRE NE PRENDO UNA NUOVA IN PARALLELO, IN MODO DA OTTIMIZZARE I TEMPI
+        #     else:
+        #         with ProcessPoolExecutor() as executor:
+        #             futures = {
+        #                     executor.submit(measure_tags, boxes, exposition, duration): 'measure',
+        #                     executor.submit(process_measurement, tags, photons=photons): 'process_measurement'
+        #                     }
+        #             for future in as_completed(futures):
+        #                 task_name = futures[future]
+        #                 try:
+        #                     result = future.result()
+        #                     if task_name == 'measure':
+        #                         tags_tmp = result
+        #                     elif task_name == 'process_measurement':
+        #                         partial_distribution.append(result)
+        #                 except Exception as e:
+        #                     print(f"Error in {task_name}: {e}")
+
+        #     tags = tags_tmp #poiche quando viene assegnato un nuovo tags_tmp è un oggetto nuovo e indipendente da quello precedente, non c'è rischio di race condition
+        # result = process_measurement(tags, photons=photons)
+        # partial_distribution.append(result)
+
+        with ProcessPoolExecutor() as executor:
+            tags_prev = None
+
+            for i in range(n_measurements):
+
+                # lancio SEMPRE la nuova misura
+                future_measure = executor.submit(measure_tags, boxes, exposition, duration)
+
+                if tags_prev is not None:
+                    # processo la misura precedente in parallelo
+                    future_process = executor.submit(process_measurement, tags_prev, photons=photons)
+
+                    result = future_process.result()
+                    partial_distribution.append(result)
+
+                # aspetto la nuova misura (serve per la prossima iterazione)
+                tags_prev = future_measure.result()
+
+            # dopo il loop manca l'ultima da processare
+            result = process_measurement(tags_prev, photons=photons)
+            partial_distribution.append(result)
+        distribution = np.sum(np.array(partial_distribution), axis=0)
+        output_list.append(distribution)
+        dmx.stop_looping()
+        time.sleep(0.1)
+
     return np.array(output_list)
 
 

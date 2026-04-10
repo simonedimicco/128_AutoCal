@@ -4,7 +4,7 @@ from tqdm import tqdm
 from WhiteLib_lite import find_coincidences_numba, count_occurrences
 
 
-path = '/media/dati_2/DATI_2026_04_03_target_2/Ricostruzione_unitaria'
+path = '/media/dati_2/DATI_2026_04_09_all20'
 #path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/DATI_2026_03_30'
 singles_folder = os.path.join(path, 'Singles')
 dark_folder = os.path.join(path, 'Buio')
@@ -44,7 +44,7 @@ for i, couple in tqdm(enumerate(couples), desc="Processing couples distributions
             t_sorted = t_tot[order]
             c_sorted = c_tot[order]
             coincidences = find_coincidences_numba(t_sorted, c_sorted, window_ps=1800, target_n=2)
-            print(f"File: {file}, Coincidences found: {len(coincidences)}")
+            print(f"File: {file},\tCoincidences found: {len(coincidences)}")
             C[i] += count_occurrences(shape=shape,  data=coincidences)
 
 for i in range(C.shape[0]):
