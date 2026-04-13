@@ -18,7 +18,7 @@ strnow = lambda: datetime.now().strftime("%Y%m%d-%H%M%S")
 strtoday = lambda: datetime.now().strftime("%Y_%m_%d")
 strtimenow = lambda: datetime.now().strftime("%H:%M:%S")
 import time
-
+import pickle
 #%%
 def setloop(input):
     loop =[0,0,0,5]
@@ -73,14 +73,19 @@ dmx.set_dwell_time(channel=channel_d, dwell_time=26)
 dmx.set_dwell_time(channel=channel_e, dwell_time=16)
 dmx.set_dwell_time(channel=channel_f, dwell_time=16)
 #%%
-loop = setloop((0,))
+loop = setloop((1,2))
 dmx.set_active_outputs(loop)
 exposition = 0.1
 duration = 1
 repetitions = int(duration/exposition)
 measure = counting.get_raw_timestamps_multiple(boxes,exposition,num_acq=repetitions)
-tags = [(t,c) for t,c in measure]
+#tags = [(t,c) for t,c in measure]
+dmx.stop_looping()
 
 #%%
-import pickle
+tags = [(np.array(t, dtype=np.int64, copy=True),
+         np.array(c, dtype=np.int64, copy=True)) for t, c in measure]
+print(tags)
+
+#%%
 pickle.dumps(tags)

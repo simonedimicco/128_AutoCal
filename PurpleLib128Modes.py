@@ -200,7 +200,7 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
         logFileExtended.write("    downLoss Singles: ")
         logFileExtended.write(str(tempLoss1))
         if (useTwoPhotons == True):
-            tempLoss2 = downLoss + lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
+            tempLoss2 = lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
             downLoss = downLoss + tempLoss2
             logFileExtended.write("    downLoss Doubles: ")
             logFileExtended.write(str(tempLoss2))

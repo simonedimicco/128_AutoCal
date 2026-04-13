@@ -245,6 +245,7 @@ def process_measurement(times, photons, trigger_channel=17, sync_ch_1=3, sync_ch
         window_ps = 1800
         
         coincidences = find_coincidences(t_sorted, c_sorted, window_ps, photons)
+        #print(f'found {len(coincidences)} coincidences')
         distribution = count_occurrences(shape=shape, data= coincidences)
     elif photons == 3:
         order = np.argsort(t_tot)
@@ -681,7 +682,7 @@ def all_inter_histograms(times_by_ch, n_channels, bin_width, num_bins):
 
 
 
-'''
+
 
 
 
@@ -747,7 +748,7 @@ def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies,
         loop = setloop(input)
         dmx.set_active_outputs(loop)
 
-        with ProcessPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=1) as executor:
             tags_prev = None
             future_process = None
 
@@ -777,4 +778,3 @@ def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies,
         time.sleep(0.1)
 
     return np.array(output_list)
-'''
