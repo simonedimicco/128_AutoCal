@@ -5,6 +5,7 @@ from auto_classical import PowerSupplies
 from qlab.devices.KeithleyPowerSupply import KeithleyPowerSupply
 import logging
 from dmx_controller import DMXController
+from multiprocessing import Process, Queue
 
 
 import numpy as np
@@ -498,6 +499,9 @@ def data_collection(inputs: list, Voltages: list, supply: PowerSupplies, n_suppl
         time.sleep(0.1)
     return np.array(output_list)
 
+def queue_measurement(q, tags, photons):
+    result = process_measurement(tags, photons)
+    q.put(result)
 
 def data_collection_new(inputs: list, Voltages: list, supply: PowerSupplies, n_supplies: int, dmx: DMXController, boxes, exposition = 0.1, duration = 60, repetitions_singles=1, repetitions_doubles = 2) -> list:
     '''
@@ -560,31 +564,25 @@ def data_collection_new(inputs: list, Voltages: list, supply: PowerSupplies, n_s
         partial_distribution = []
         loop = setloop(input)
         dmx.set_active_outputs(loop)
+        tags_prev = None
 
-        with ProcessPoolExecutor() as executor:
-            tags_prev = None
-            future_process = None
+        for _ in range(n_measurements):
+            
+            if tags_prev is not None:
+                q = Queue()
+                p = Process(target=queue_measurement, args=(q, tags_prev, photons))
+                p.start()
+            measurement = measure(boxes, exposition, duration)
+            tags = [(t,c) for t,c in measurement]
+            if tags_prev is not None:
+                p.join()
+                result = q.get()
+                partial_distribution.append(result)
+            tags_prev = tags
 
-            for i in range(n_measurements):
-
-                # 1️⃣ lancio il processing precedente (se esiste)
-                if tags_prev is not None:
-                    future_process = executor.submit(process_measurement, tags_prev, photons=photons)
-
-                # 2️⃣ faccio la nuova misura (mentre il processing gira!)
-                tags = measure_tags(boxes, exposition, duration)
-
-                # 3️⃣ ora recupero il risultato del processing precedente
-                if future_process is not None:
-                    result = future_process.result()
-                    partial_distribution.append(result)
-
-                # aggiorno
-                tags_prev = tags
-
-            # ultima misura
-            result = process_measurement(tags_prev, photons=photons)
-            partial_distribution.append(result)
+        
+        result = process_measurement(tags_prev, photons=photons)
+        partial_distribution.append(result)
         distribution = np.sum(np.array(partial_distribution), axis=0)
         output_list.append(distribution)
         dmx.stop_looping()
@@ -683,3 +681,100 @@ def all_inter_histograms(times_by_ch, n_channels, bin_width, num_bins):
 
 
 
+'''
+
+
+
+def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies, n_supplies: int, dmx: DMXController, boxes, exposition = 0.1, duration = 60, repetitions_singles=1, repetitions_doubles = 2) -> list:
+    
+    #    In qusta versione di data collection separo la collection in due parti a seconda che stiamo raccogliendo dati per singlos o doppie.
+    #    In questo modo posso parallelizzare la raccolta dati e l'elaborazione per le doppie.
+    
+    if len(Voltages)!=n_supplies*2:
+        raise ValueError('Number of voltages does not match the number of supplies')
+    if type(Voltages)==np.ndarray:
+        Voltages = np.reshape(Voltages, (n_supplies, 2))
+    elif type(Voltages)== list:
+        Voltages = np.reshape(np.array(Voltages), (n_supplies, 2))
+    else:
+        raise ValueError('Voltages must be either list or numpy array')
+    
+    change_voltages(supply, Voltages)
+    #misura e salva correnti e tensioni in un file di log
+    output_list=[]
+    singles_inputs = [input for input in inputs if len(input)==1]
+    doubles_inputs = [input for input in inputs if len(input)==2]
+
+    #PRESA DATI PER LE SINGOLE
+    n_measurments = repetitions_singles
+    photons = 1
+    for input in singles_inputs:
+        dark_distribution = np.zeros(128, dtype=np.int64)
+        single_distribution = np.zeros(128, dtype=np.int64)
+
+        #PRIMA MISURO IL DARK PER LE SINGOLE
+        loop = setloop((0,))
+        dmx.set_active_outputs(loop)
+        for i in range(n_measurments):
+            measurement = measure(boxes, exposition, duration)
+            tags = [(t,c) for t,c in measurement]
+            result = process_measurement(tags, photons=photons)
+            dark_distribution += result
+        dmx.stop_looping()
+        time.sleep(0.1)  
+
+        #QUI MISURO IL SEGNALE EFFETTIVO DELLE SINGOLE                   #
+        loop = setloop(input)
+        dmx.set_active_outputs(loop)
+        for i in range(n_measurments):
+            measurement = measure(boxes, exposition, duration)
+            tags = [(t,c) for t,c in measurement]
+            result = process_measurement(tags, photons=photons)
+            single_distribution += result
+        dmx.stop_looping()
+        time.sleep(0.1) 
+
+        #TOLGO IL RUMORE DI FONDO E AGGIUNGO LA DISTRIBUZIONE CORRISPONDENTE ALL'INPUT CORRENTE ALLA LISTA DEI RISULTATI
+        single_distribution = single_distribution - dark_distribution
+        single_distribution[single_distribution < 0] = 0
+        output_list.append(single_distribution)
+          
+    #PRESA DATI PER LE DOPPIE
+    n_measurements = repetitions_doubles
+    photons = 2
+    for input in doubles_inputs:
+        partial_distribution = []
+        loop = setloop(input)
+        dmx.set_active_outputs(loop)
+
+        with ProcessPoolExecutor() as executor:
+            tags_prev = None
+            future_process = None
+
+            for i in range(n_measurements):
+
+                # 1️⃣ lancio il processing precedente (se esiste)
+                if tags_prev is not None:
+                    future_process = executor.submit(process_measurement, tags_prev, photons=photons)
+
+                # 2️⃣ faccio la nuova misura (mentre il processing gira!)
+                tags = measure_tags(boxes, exposition, duration)
+
+                # 3️⃣ ora recupero il risultato del processing precedente
+                if future_process is not None:
+                    result = future_process.result()
+                    partial_distribution.append(result)
+
+                # aggiorno
+                tags_prev = tags
+
+            # ultima misura
+            result = process_measurement(tags_prev, photons=photons)
+            partial_distribution.append(result)
+        distribution = np.sum(np.array(partial_distribution), axis=0)
+        output_list.append(distribution)
+        dmx.stop_looping()
+        time.sleep(0.1)
+
+    return np.array(output_list)
+'''
