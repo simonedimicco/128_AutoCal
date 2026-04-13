@@ -182,6 +182,23 @@ volts[9] = [6.470, 6.944]
 #volts[9] = [6.470, 0]
 print(f'You are going to set the following voltages:')
 print(volts)
+
+#%%
+#after training 2
+volts[0]=[28.57549008, 18.62124966]
+volts[1]=[27.16103075, 11.14849896] 
+volts[2]=[15.18545736, 40.13568463]
+volts[3]=[14.91342976, 27.947017  ]
+volts[4]=[31.69506156, 33.2545421 ]
+volts[5]=[26.58895667, 22.29194157]
+volts[6]=[22.00124576, 22.65344002] 
+volts[7]=[12.3647888 , 15.33748864]
+volts[8]=[22.59317415,  1.66613522]
+volts[9]=[13.58972876,  0.38376709]
+volts_array = list( np.sqrt(volts))
+volts = [[float(x), float(y)] for x, y in volts_array]
+print(f'You are going to set the following voltages:')
+print(volts)
 #%%
 change_voltages(supply, volts)
 #%%
