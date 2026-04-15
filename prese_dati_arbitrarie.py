@@ -39,6 +39,7 @@ list_conncted=[x for x in rm.list_resources()]
 addresses = ['ASRL24::INSTR', 'ASRL25::INSTR', 'ASRL26::INSTR', 'ASRL27::INSTR', 'ASRL28::INSTR', 'ASRL29::INSTR','USB0::0x05E6::0x2230::9100018::INSTR', 'USB0::0x05E6::0x2230::9102515::INSTR', 'ASRL6::INSTR', 'ASRL8::INSTR']
 print(f'You are connecting {len(addresses)} Keithleys')
 volts = [[0,0] for _ in range(len(addresses))]
+#%%
 supply = PowerSupplies(addresses)
 change_voltages(supply, volts)
 
@@ -190,21 +191,35 @@ exposition = 0.1
 duration= 6
 repetitions_singles = 1
 repetitions_doubles = 10
-t1 = time.time()
-results_new = data_collection_fallita(inputs, volts, supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
-t2 = time.time()
-results = data_collection(inputs, volts, supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
 
-t3 = time.time()
-print(f"Data collection new completed in {t2-t1:.2f} seconds")
-print(f"Data collection completed in {t3-t2:.2f} seconds")
+if __name__== "__main__":
+    supply = PowerSupplies(addresses)
+    boxes_ind = QuTag.discover()
+    ind = [b'T 02 0010', b'T 02 0021']
+    boxes = []
+    for i in ind:
+        for j in boxes_ind:
+            if j._sn == i:
+               boxes.append(j)
 
-diff = abs(results_new - results)/results
-plt.plot(diff.flatten(), 'o')
-plt.title('Difference between old and new data collection')
-plt.xlabel('Index')
-plt.ylabel('Difference')
-plt.show()
+    if len(ind) != len(boxes):
+        raise ValueError('scatole non trovate')
+    dmx = DMXController(log_level=logging.DEBUG)
+    t1 = time.time()
+    results_new = data_collection_fallita(inputs, volts, supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
+    t2 = time.time()
+    results = data_collection(inputs, volts, supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
+    
+    t3 = time.time()
+    print(f"Data collection new completed in {t2-t1:.2f} seconds")
+    print(f"Data collection completed in {t3-t2:.2f} seconds")
+    
+    diff = abs(results_new - results)/results
+    plt.plot(diff.flatten(), 'o')
+    plt.title('Difference between old and new data collection')
+    plt.xlabel('Index')
+    plt.ylabel('Difference')
+    plt.show()
         
 
 #%%

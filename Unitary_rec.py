@@ -259,7 +259,7 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_aftertraining'
+dir_name = path+'DATI_' + strtoday() + '_aftertraining_2'
 #dir_name = path+'misure_cluce_classica'
 import os
 if not os.path.exists(dir_name):
@@ -290,16 +290,17 @@ ripetizioni= int(durata/esposizione)
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
-
+save_path = os.path.join(dir_name,'Ricostruzione_unitaria')
+os.makedirs(save_path, exist_ok=True)
 
 for sequence in inputs:
     
     photons = len(sequence)
     
     if photons == 1:
-        folder_dark= os.path.join(save_path, f'measurement_dark_{names[sequence[0]-1]}')
+        folder_dark= os.path.join(save_path, 'Buio' ,f'{names[sequence[0]-1]}')
         os.makedirs(folder_dark, exist_ok=True )
-        folder_signal = os.path.join(save_path, f'measurement_1ph_{names[sequence[0]-1]}')
+        folder_signal = os.path.join(save_path, "Singles", f'{names[sequence[0]-1]}')
         os.makedirs(folder_signal, exist_ok=True )
         loop = setloop((0,))
         dmx.set_active_outputs(loop)
@@ -352,6 +353,88 @@ for sequence in inputs:
         
     else:
         raise ValueError('Invalid number of chosen inputs')
+
+#%%
+names=['b','c', 'd', 'e']
+#Voltages=[0 for _ in range(len(addresses))]
+inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
+dir_name_sup = path+'DATI_' + strtoday() + '_ricostruzioni_ripetute'
+for kkk in range(5):
+
+    dir_name = os.path.join(dir_name_sup, f'measuremente_{kkk+1}')
+    os.makedirs(dir_name, exist_ok=True)
+    print(dir_name)
+    save_path = dir_name
+    with open(os.path.join(path,dir_name) + '/'+"readme.txt", "w") as file:
+        file.write("trigger ch 17 box 2\n")
+        file.write('sync channels: ch 3 box 1 and ch 27 box 2\n')
+        file.write("voltages:\n")
+        for voltage in supply.voltages_measure:
+            file.write(f"{voltage:.3f}\n")
+        file.write("currents:\n")
+        for curr in supply.currents_measure:
+            file.write(f'{curr:.3e}\n')
+            
+    for sequence in inputs:
+        
+        photons = len(sequence)
+        
+        if photons == 1:
+            folder_dark= os.path.join(save_path, f'measurement_dark_{names[sequence[0]-1]}')
+            os.makedirs(folder_dark, exist_ok=True )
+            folder_signal = os.path.join(save_path, f'measurement_1ph_{names[sequence[0]-1]}')
+            os.makedirs(folder_signal, exist_ok=True )
+            loop = setloop((0,))
+            dmx.set_active_outputs(loop)
+            time.sleep(1)
+            
+            for i in range(5):
+                print(f'Dark measurement channel {names[sequence[0]-1]} {i+1}/5 - started at {strtimenow()}')
+                save_name_dark = os.path.join(folder_dark, f'misura_{i+1}')
+                measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+                times = [(t,c) for t,c in measure]
+                times_box_1,channels_box_1 = times[0]
+                times_box_2,channels_box_2 = times[1]
+                t_tot, c_tot = process_measurement(times, photons=0)
+                np.savez_compressed(save_name_dark, t_tot=t_tot, c_tot=c_tot)
+            dmx.stop_looping()
+            time.sleep(1)
+            loop = setloop(sequence)
+            dmx.set_active_outputs(loop)
+            time.sleep(1)
+            
+            for i in range(5):
+                print(f'Singles measurement channel {names[sequence[0]-1]} {i+1}/5 - started at {strtimenow()}')
+                save_name_signal = os.path.join(folder_signal, f'misura_{i+1}')
+                measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+                times = [(t,c) for t,c in measure]
+                times_box_1,channels_box_1 = times[0]
+                times_box_2,channels_box_2 = times[1]
+                t_tot, c_tot = process_measurement(times, photons=0)
+                np.savez_compressed(save_name_signal, t_tot=t_tot, c_tot=c_tot)
+            dmx.stop_looping()
+            time.sleep(1)
+            
+        elif photons==2:
+            folder_couples= os.path.join(save_path, f'measurement_2ph_{names[sequence[0]-1]}{names[sequence[1]-1]}')
+            os.makedirs(folder_couples, exist_ok=True )
+            loop = setloop(sequence)
+            dmx.set_active_outputs(loop)
+            time.sleep(1)
+            for i in range(20):
+                print(f'Couples measurement channels {names[sequence[0]-1]}{names[sequence[1]-1]} {i+1}/20 - started at {strtimenow()}')
+                save_name_couples = os.path.join(folder_couples, f'misura_{i+1}')
+                measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+                times = [(t,c) for t,c in measure]
+                times_box_1,channels_box_1 = times[0]
+                times_box_2,channels_box_2 = times[1]
+                t_tot, c_tot = process_measurement(times, photons=0)
+                np.savez_compressed(save_name_couples, t_tot=t_tot, c_tot=c_tot)
+            dmx.stop_looping()
+            time.sleep(1)
+            
+        else:
+            raise ValueError('Invalid number of chosen inputs')
             
 #%%
 

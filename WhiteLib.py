@@ -277,7 +277,12 @@ def measure_tags(boxes, esposizione, durata):
     tags = [(t,c) for t,c in measurement]
     return tags
 
-
+def measure_tags_pickable(boxes, esposizione, durata):
+    ripetizioni= int(durata/esposizione)
+    measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+    tags = [(np.array(t, dtype=np.int64, copy=True),
+             np.array(c, dtype=np.int64, copy=True)) for t, c in measure]
+    return tags
 @njit(cache=True)
 def find_coincidences_numba(t, c, window_ps, target_n):
     N = t.shape[0]
@@ -748,7 +753,7 @@ def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies,
         loop = setloop(input)
         dmx.set_active_outputs(loop)
 
-        with ThreadPoolExecutor(max_workers=1) as executor:
+        with ProcessPoolExecutor(max_workers=1) as executor:
             tags_prev = None
             future_process = None
 
@@ -759,7 +764,7 @@ def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies,
                     future_process = executor.submit(process_measurement, tags_prev, photons=photons)
 
                 # 2️⃣ faccio la nuova misura (mentre il processing gira!)
-                tags = measure_tags(boxes, exposition, duration)
+                tags = measure_tags_pickable(boxes, exposition, duration)
 
                 # 3️⃣ ora recupero il risultato del processing precedente
                 if future_process is not None:
