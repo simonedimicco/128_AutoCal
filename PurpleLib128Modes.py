@@ -9,7 +9,7 @@ import time
 from tqdm import tqdm
 from WhiteDict import *
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-from WhiteLib import change_voltages, data_collection
+from WhiteLib import change_voltages, data_collection_parallel
 
 #from script import intensities
 
@@ -64,7 +64,7 @@ def lossEvalExp128(parameters, inputs, target, trainingParams):
     exposition = trainingParams["exposition"]
     dmx = trainingParams["dmx"]
 
-    tempPrediction = data_collection(inputs, np.sqrt(parameters), supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
+    tempPrediction = data_collection_parallel(inputs, np.sqrt(parameters), supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
     tempLoss = MyMaeExp(tempPrediction, target)
     #print(tempLoss)
     return(tempLoss)
@@ -105,7 +105,11 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
     parameterValueMaxReset = trainingParams["parameterValueMaxReset"]
     parameterValueMinReset = trainingParams["parameterValueMinReset"]
     chipType = trainingParams["chipType"]
-    paramsOrderList = np.arange(numParams)
+    skippedParameters = trainingParams["skippedParameters"]
+    paramsOrderListTemp = list(np.arange(numParams))
+    paramsOrderListList = [ param for param in paramsOrderListTemp if param not in skippedParameters ]
+    paramsOrderList = np.array(paramsOrderListList)
+    numParamsWorking = len(paramsOrderList)
     bestLoss = 1000
     maxPairs = len(input_states_two_full)
     bestParams = np.zeros_like(currentParamsTrainable)
@@ -119,9 +123,9 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
         if (typeOrder == "allRandom"):
             chosenParam = np.random.choice(numParams)
         elif (typeOrder == "listRandom"):
-            if (epoch%numParams == 0):
+            if (epoch%numParamsWorking == 0):
                 np.random.shuffle(paramsOrderList)
-            chosenParam = paramsOrderList[epoch%numParams]
+            chosenParam = paramsOrderList[epoch%numParamsWorking]
         else:
             print("ERROR, NO VALID ORDER TYPE SELECTED")
 
