@@ -691,7 +691,7 @@ def all_inter_histograms(times_by_ch, n_channels, bin_width, num_bins):
 
 
 
-def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies, n_supplies: int, dmx: DMXController, boxes, exposition = 0.1, duration = 60, repetitions_singles=1, repetitions_doubles = 2) -> list:
+def data_collection_parallel(inputs: list, Voltages: list, supply: PowerSupplies, n_supplies: int, dmx: DMXController, boxes, exposition = 0.1, duration = 60, repetitions_singles=1, repetitions_doubles = 2) -> list:
     
     #    In qusta versione di data collection separo la collection in due parti a seconda che stiamo raccogliendo dati per singlos o doppie.
     #    In questo modo posso parallelizzare la raccolta dati e l'elaborazione per le doppie.
@@ -758,14 +758,15 @@ def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies,
             future_process = None
 
             for i in range(n_measurements):
-
+                t0 = time.time()
                 # 1️⃣ lancio il processing precedente (se esiste)
                 if tags_prev is not None:
                     future_process = executor.submit(process_measurement, tags_prev, photons=photons)
 
                 # 2️⃣ faccio la nuova misura (mentre il processing gira!)
+                t1 = time.time()
                 tags = measure_tags_pickable(boxes, exposition, duration)
-
+                t2 = time.time()
                 # 3️⃣ ora recupero il risultato del processing precedente
                 if future_process is not None:
                     result = future_process.result()
@@ -773,7 +774,9 @@ def data_collection_fallita(inputs: list, Voltages: list, supply: PowerSupplies,
 
                 # aggiorno
                 tags_prev = tags
-
+                t3 = time.time()
+                print(f'full cilco : {t3-t0:.2f}s')
+                print(f'tempo misura: {t2-t1:.2f}s')
             # ultima misura
             result = process_measurement(tags_prev, photons=photons)
             partial_distribution.append(result)
