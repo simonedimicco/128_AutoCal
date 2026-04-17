@@ -122,8 +122,10 @@ if __name__=="__main__":
     typeTraining = "absolute"
     #typeOrder = "allRandom"
     typeOrder = "listRandom"
-    useTwoPhotons = True
-    LR = 5
+    useTwoPhotons = False
+    #checkPairsNum = 3
+    checkPairsNum = 0
+    LR = 8
     #LR = 1
     #LR = 0.05
     #LR = 0.005
@@ -134,8 +136,6 @@ if __name__=="__main__":
     epochsNum = 90
     trainingRepetitions = 10
     printProgress = "all"                     # "off", "last", "all"
-    checkPairsNum = 3
-    #checkPairsNum = 0
     avoidBoundary = True
     
     Nsupp = len(addresses)
@@ -155,18 +155,18 @@ if __name__=="__main__":
     print(tempArr2)
     currentParamsTrainable = tempArr2
     #currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
-    currentParamsTrainable[19] = 0.01
-    currentParamsTrainable[17] = 0.01
+    currentParamsTrainable[19] = 0.0
+    currentParamsTrainable[17] = 0.0
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    fileName = path + "logs/" + strnow_DS + "_128modi_training_target1_3Pairs_T2Start_1.txt"
+    fileName = path + "logs/" + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_1.txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
-    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_training_target1_3Pairs_T2Start_1_extended.txt"
+    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_1_extended.txt"
     logFileExtended = open(fileNameExtended, 'w', encoding="utf-8")
 
-    outputString = "Training Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
+    outputString = "Training Phase 1 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
 
     logFile.write(outputString)
     logFileExtended.write(outputString)
@@ -179,15 +179,54 @@ if __name__=="__main__":
     currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
 
 
+    #for epoch in range(n_epochs):
+        #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
+
+
+    savefileName = path + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_intermediate_1.npz"
+    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
+
+
+    # Second Step training
+
+    LR = 2
+    LR_check = LR
+    LR_move = LR
+    epochsNum = 90
+    useTwoPhotons = True
+    checkPairsNum = 3
+    
+    trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset, "chipType": chipType, "duration": duration, "repetitions_singles": repetitions_singles, "repetitions_doubles": repetitions_doubles, "skippedParameters": skippedParameters}           
+
+    
+    outputString = "Training Phase 2 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
+
+    logFile.write(outputString)
+    logFileExtended.write(outputString)
+
+    logFile.flush()
+    logFileExtended.flush()
+    
+
+    currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
+
 
     #for epoch in range(n_epochs):
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target1_3Pairs_T2Start_result_1.npz"
+    savefileName = path + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_result_1.npz"
 
     np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
 
+
+    outputString = "Training Finished \n" + "Final parameters: " + str(currentParamsTrainable) + "\n"
+
+    logFile.write(outputString)
+    logFileExtended.write(outputString)
+
+    logFile.flush()
+    logFileExtended.flush()
 
     #set voltages to 0
     volts = [[0,0] for _ in range(len(addresses))]

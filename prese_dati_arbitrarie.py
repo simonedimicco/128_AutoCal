@@ -19,7 +19,7 @@ from numba import njit
 import time 
 import pyvisa as visa
 from tqdm import tqdm
-from WhiteLib import process_measurement, setloop, change_voltages, split_times_by_channel, all_inter_histograms, all_intra_histograms, data_collection, data_collection_new, data_collection_fallita
+from WhiteLib import process_measurement, setloop, change_voltages, split_times_by_channel, all_inter_histograms, all_intra_histograms, data_collection, data_collection_new, data_collection_parallel
 from datetime import datetime
 strnow = lambda: datetime.now().strftime("%Y%m%d-%H%M%S")
 strtoday = lambda: datetime.now().strftime("%Y_%m_%d")
