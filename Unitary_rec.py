@@ -184,17 +184,17 @@ print(f'You are going to set the following voltages:')
 print(volts)
 
 #%%
-#after training 2
-volts[0]=[28.57549008, 18.62124966]
-volts[1]=[27.16103075, 11.14849896] 
-volts[2]=[15.18545736, 40.13568463]
-volts[3]=[14.91342976, 27.947017  ]
-volts[4]=[31.69506156, 33.2545421 ]
-volts[5]=[26.58895667, 22.29194157]
-volts[6]=[22.00124576, 22.65344002] 
-volts[7]=[12.3647888 , 15.33748864]
-volts[8]=[22.59317415,  1.66613522]
-volts[9]=[13.58972876,  0.38376709]
+#after training  16_04_2026
+volts[0]=[2.56701116e+01, 2.12822787e+01]
+volts[1]=[3.37560541e+01, 5.74932736e-02]
+volts[2]=[2.62974998e+01, 3.52617014e+01]
+volts[3]=[2.04022434e+01, 3.51609933e+01]
+volts[4]=[2.26476496e+01, 2.98499203e+01]
+volts[5]=[1.11470086e+01, 1.93934777e+01]
+volts[6]=[2.23742463e+01, 1.66596632e+01]
+volts[7]=[9.42504462e+00, 2.77523432e+01]
+volts[8]=[2.76651432e+01, 1.00000000e-02]
+volts[9]=[2.35519838e+01, 1.00000000e-02]
 volts_array = list( np.sqrt(volts))
 volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
@@ -259,7 +259,7 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_aftertraining_2'
+dir_name = path+'DATI_' + strtoday() + '_T1_3P_ST2'
 #dir_name = path+'misure_cluce_classica'
 import os
 if not os.path.exists(dir_name):
@@ -269,6 +269,7 @@ save_path = dir_name
 
 #%%
 with open(os.path.join(path,dir_name) + '/'+"readme.txt", "w") as file:
+    file.write("target 1\t3 coppie\t start target2\n")
     file.write("trigger ch 17 box 2\n")
     file.write('sync channels: ch 3 box 1 and ch 27 box 2\n')
     file.write("voltages:\n")
@@ -463,6 +464,6 @@ for sequence in inputs:
 volts = [[0,0] for _ in range(len(addresses))]
 change_voltages(supply, volts)
 
-#%%
+ #%%
 
 del dmx

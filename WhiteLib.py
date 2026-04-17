@@ -758,15 +758,15 @@ def data_collection_parallel(inputs: list, Voltages: list, supply: PowerSupplies
             future_process = None
 
             for i in range(n_measurements):
-                t0 = time.time()
+                #t0 = time.time()
                 # 1️⃣ lancio il processing precedente (se esiste)
                 if tags_prev is not None:
                     future_process = executor.submit(process_measurement, tags_prev, photons=photons)
 
                 # 2️⃣ faccio la nuova misura (mentre il processing gira!)
-                t1 = time.time()
+                #t1 = time.time()
                 tags = measure_tags_pickable(boxes, exposition, duration)
-                t2 = time.time()
+                #t2 = time.time()
                 # 3️⃣ ora recupero il risultato del processing precedente
                 if future_process is not None:
                     result = future_process.result()
@@ -774,9 +774,9 @@ def data_collection_parallel(inputs: list, Voltages: list, supply: PowerSupplies
 
                 # aggiorno
                 tags_prev = tags
-                t3 = time.time()
-                print(f'full cilco : {t3-t0:.2f}s')
-                print(f'tempo misura: {t2-t1:.2f}s')
+                #t3 = time.time()
+                #print(f'full cilco : {t3-t0:.2f}s')
+                #print(f'tempo misura: {t2-t1:.2f}s')
             # ultima misura
             result = process_measurement(tags_prev, photons=photons)
             partial_distribution.append(result)

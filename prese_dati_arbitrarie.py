@@ -224,3 +224,21 @@ if __name__== "__main__":
 
 #%%
 dmx.stop_looping()
+#%%
+logging.disable(logging.DEBUG)
+path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
+
+
+
+with open(path+'log_file.txt', "w") as log_file:
+    t0=time.time()
+    measure_currents= supply.currents_measure
+    #measure_voltages= supply.voltages_measure
+    log_file.write(f'{strnow()}\n')
+    #log_file.write('Voltages: ' + str(measure_voltages) + '\n')
+    log_file.write('Currents: ' + str(measure_currents) + '\n')
+    t1=time.time()
+    
+print(f'{t1-t0:.2f}s')
+
+

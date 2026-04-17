@@ -1,8 +1,6 @@
-#%%
 '''
 IMPORT LIBRARIES SECTION:
 '''
-#%%
 from qlab.devices.tdc import QuTag
 import qlab.counting.counting as counting
 import qlab.counting.cocount as cocount
@@ -10,7 +8,7 @@ from auto_classical import PowerSupplies
 from qlab.devices.KeithleyPowerSupply import KeithleyPowerSupply
 import logging
 from dmx_controller import DMXController
-#%%
+
 import numpy as np
 from numba import njit
 import time 
@@ -25,7 +23,6 @@ from datetime import datetime
 strnow = lambda: datetime.now().strftime("%Y%m%d-%H%M%S")
 strtoday = lambda: datetime.now().strftime("%Y_%m_%d")
 strtimenow = lambda: datetime.now().strftime("%H:%M:%S")
-#%%
 
 if __name__=="__main__":
 
@@ -66,7 +63,9 @@ if __name__=="__main__":
     channel_e= 5
 
     dmx = DMXController(log_level=logging.DEBUG)
+    time.sleep(0.1)
     dmx.stop_looping()
+    time.sleep(0.1)
     dmx.set_dwell_time(channel=channel_a, dwell_time=26)
     dmx.set_dwell_time(channel=channel_b, dwell_time=26)
     dmx.set_dwell_time(channel=channel_c, dwell_time=26)
@@ -124,15 +123,15 @@ if __name__=="__main__":
     #typeOrder = "allRandom"
     typeOrder = "listRandom"
     useTwoPhotons = True
-    #LR = 5
-    LR = 1
+    LR = 5
+    #LR = 1
     #LR = 0.05
     #LR = 0.005
     #LR = 0.01
     LR_check = LR
     #LR_move = LR * 5
     LR_move = LR
-    epochsNum = 100
+    epochsNum = 90
     trainingRepetitions = 10
     printProgress = "all"                     # "off", "last", "all"
     checkPairsNum = 3
@@ -214,7 +213,7 @@ if __name__=="__main__":
     #change_voltages(supply, volts)
     
 
-    del dmx
+
         
 
 
