@@ -183,7 +183,7 @@ print(f'You are going to set the following voltages:')
 print(volts)
 
 #%%
-#after training  16_04_2026
+#after training  20_04_2026
 volts[0] = [32.87435446, 25.51647552]
 volts[1] = [35.16892697,  1.92600443]
 volts[2] = [21.65555212, 29.83898274]
@@ -258,7 +258,7 @@ SET WORKING DIRECTORY
 '''
 #%%exc
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_T1_3P_ST2'
+dir_name = path+'DATI_' + strtoday() + '_multifase_1'
 #dir_name = path+'misure_cluce_classica'
 import os
 if not os.path.exists(dir_name):
@@ -354,7 +354,7 @@ for sequence in inputs:
     else:
         raise ValueError('Invalid number of chosen inputs')
 
-#%%
+☻#%%
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]

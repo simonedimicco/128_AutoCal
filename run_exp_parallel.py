@@ -203,7 +203,7 @@ if __name__=="__main__":
 
     logFile.write(outputString)
     logFileExtended.write(outputString)
-
+ASRL27
     logFile.flush()
     logFileExtended.flush()
     
