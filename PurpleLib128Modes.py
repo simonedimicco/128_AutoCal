@@ -114,6 +114,8 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
     maxPairs = len(input_states_two_full)
     bestParams = np.zeros_like(currentParamsTrainable)
     lossHistory = np.empty(epochsNum + 1)
+    lossUpHistory = np.empty(epochsNum + 1)
+    lossDownHistory = np.empty(epochsNum + 1)
     #fidelityHistory = np.empty(epochsNum + 1)
     
     colorStart = '\033[92m'
@@ -196,6 +198,7 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
             logFileExtended.write(str(tempLoss2))
         logFileExtended.write("    upLoss Total: ")
         logFileExtended.write(str(upLoss))
+        lossUpHistory[epoch] = upLoss
             
         currentParamsTrainable[chosenParam] = UpdateParameter(tempStore, (-checkShift), avoidBoundary, parameterValueMin, parameterValueMax, parameterValueMaxReset, parameterValueMinReset)
         print(colorStart, "Epoch:", epoch, "Measure 3", colorStop)
@@ -211,7 +214,7 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
         logFileExtended.write("    downLoss Total: ")
         logFileExtended.write(str(downLoss))
         logFileExtended.write("\n")
-        
+        lossDownHistory[epoch] = downLoss
         
         # calculating which direction to move
         if ((upLoss < prevLoss) & (downLoss < prevLoss)):
@@ -266,7 +269,7 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
     logFileExtended.write("\n")
     logFileExtended.flush()
     #return currentParamsTrainable, lossHistory, fidelityHistory, bestParams, bestLoss
-    return currentParamsTrainable, lossHistory, bestParams, bestLoss
+    return currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory
 
 # Varie funzioni training.
 

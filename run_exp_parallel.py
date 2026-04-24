@@ -81,7 +81,7 @@ if __name__=="__main__":
     '''
     TARGET DEFINITION
     '''
-    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target'
+    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_2'
     # target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_all20'
     with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
         targetSingles = data['distributions']
@@ -149,18 +149,23 @@ if __name__=="__main__":
     #tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
 
     #target2 params
-    tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
+    #tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
 
-    tempArr2 = tempArr**2
-    print(tempArr2)
-    currentParamsTrainable = tempArr2
+
+
+    #tempArr2 = tempArr**2
+    #print(tempArr2)
+    #currentParamsTrainable = tempArr2
     #currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
+    
+    currentParamsTrainable = np.ones(20) * 32
+    
     currentParamsTrainable[19] = 0.0
     currentParamsTrainable[17] = 0.0
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    trainingName = "_128modi_training_target1_3PairsPre_T2Start_1"
+    trainingName = "_128modi_training_target2_3PairsPre_32Start_1"
     fileName = path + "logs/" + strnow_DS + trainingName + ".txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
@@ -171,21 +176,25 @@ if __name__=="__main__":
 
     logFile.write(outputString)
     logFileExtended.write(outputString)
+    
+    logFileExtended.write(str(trainingParams))
+    logFileExtended.write("\n")
+    
 
     logFile.flush()
     logFileExtended.flush()
 
     logging.disable(logging.DEBUG)
 
-    currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
+    currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
 
 
     #for epoch in range(n_epochs):
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_intermediate_1.npz"
-    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
+    savefileName = path + strnow_DS + "_128modi_training_target2_3PairsPre_32Start_intermediate_1.npz"
+    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
 
     # Second Step training
@@ -205,20 +214,23 @@ if __name__=="__main__":
     logFile.write(outputString)
     logFileExtended.write(outputString)
     
+    logFileExtended.write(str(trainingParams))
+    logFileExtended.write("\n")
+    
     logFile.flush()
     logFileExtended.flush()
     
 
-    currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
+    currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
 
 
     #for epoch in range(n_epochs):
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_result_1.npz"
+    savefileName = path + strnow_DS + "_128modi_training_target2_3PairsPre_32Start_result_1.npz"
 
-    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
+    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
 
     outputString = "Training Finished \n" + "Final parameters: " + str(currentParamsTrainable) + "\n"
