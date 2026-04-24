@@ -14,7 +14,7 @@ from numba import njit
 import time 
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 from WhiteLib import change_voltages, data_collection
-from PurpleLib128Modes import myTrainingLoopExp, lossEvalExp
+from PurpleLib128Modes import myTrainingLoopExp, lossEvalExp, StabilityMeasure
 import pyvisa as visa
 from tqdm import tqdm
 import os
@@ -114,7 +114,8 @@ if __name__=="__main__":
     skippedParameters = [19, 17]
 
 
-    duration=6
+    iterations = 50
+    duration = 6
     exposition = 0.1
     repetitions_singles=1
     repetitions_doubles=10
@@ -122,9 +123,9 @@ if __name__=="__main__":
     typeTraining = "absolute"
     #typeOrder = "allRandom"
     typeOrder = "listRandom"
-    useTwoPhotons = False
-    #checkPairsNum = 3
-    checkPairsNum = 0
+    useTwoPhotons = True
+    checkPairsNum = 6
+    #checkPairsNum = 0
     LR = 8
     #LR = 1
     #LR = 0.05
@@ -146,10 +147,10 @@ if __name__=="__main__":
 
 
     #target1 params
-    #tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
+    tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
 
     #target2 params
-    tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
+    #tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
 
     tempArr2 = tempArr**2
     print(tempArr2)
@@ -160,14 +161,13 @@ if __name__=="__main__":
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    trainingName = "_128modi_training_target1_3PairsPre_T2Start_1"
-    fileName = path + "logs/" + strnow_DS + trainingName + ".txt"
+    fileName = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_2.txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
-    fileNameExtended = path + "logs/" + strnow_DS + trainingName + "_extended.txt"
+    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_2_extended.txt"
     logFileExtended = open(fileNameExtended, 'w', encoding="utf-8")
 
-    outputString = "Training Phase 1 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
+    outputString = "Starting parameters: " + str(currentParamsTrainable) + "\n"
 
     logFile.write(outputString)
     logFileExtended.write(outputString)
@@ -176,58 +176,17 @@ if __name__=="__main__":
     logFileExtended.flush()
 
     logging.disable(logging.DEBUG)
-
-    currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
-
-
-    #for epoch in range(n_epochs):
-        #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
-
-
-    savefileName = path + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_intermediate_1.npz"
-    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
-
-
-    # Second Step training
-
-    LR = 2
-    LR_check = LR
-    LR_move = LR
-    epochsNum = 90
-    useTwoPhotons = True
-    checkPairsNum = 3
-    
-    trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset, "chipType": chipType, "duration": duration, "repetitions_singles": repetitions_singles, "repetitions_doubles": repetitions_doubles, "skippedParameters": skippedParameters}           
-
-    
-    outputString = "Training Phase 2 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
-
-    logFile.write(outputString)
-    logFileExtended.write(outputString)
-    
-    logFile.flush()
-    logFileExtended.flush()
-    
-
-    currentParamsTrainable, lossHistory, bestParams, bestLoss = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
+  
+    costFluctuationSingles, costFluctuationDoubles = StabilityMeasure(currentParamsTrainable, iterations, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams, paramsUnitary = [])
 
 
     #for epoch in range(n_epochs):
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target1_3PairsPre_T2Start_result_1.npz"
+    savefileName = path + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_2.npz"
+    np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles)
 
-    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
-
-
-    outputString = "Training Finished \n" + "Final parameters: " + str(currentParamsTrainable) + "\n"
-
-    logFile.write(outputString)
-    logFileExtended.write(outputString)
-
-    logFile.flush()
-    logFileExtended.flush()
 
     #set voltages to 0
     volts = [[0,0] for _ in range(len(addresses))]

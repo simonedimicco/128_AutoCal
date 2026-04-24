@@ -269,3 +269,38 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
     return currentParamsTrainable, lossHistory, bestParams, bestLoss
 
 # Varie funzioni training.
+
+def StabilityMeasure(currentParamsTrainable, iterations, input_states_one, targetState1, input_states_two, targetState2, logFile, logFileExtended, trainingParams, paramsUnitary = []):
+    epochsNum = trainingParams["epochsNum"]
+    useTwoPhotons = trainingParams["useTwoPhotons"]
+    printProgress = trainingParams["printProgress"]
+    avoidBoundary = trainingParams["avoidBoundary"]
+    parameterValueMin = trainingParams["parameterValueMin"]
+    parameterValueMax = trainingParams["parameterValueMax"]
+    parameterValueMaxReset = trainingParams["parameterValueMaxReset"]
+    parameterValueMinReset = trainingParams["parameterValueMinReset"]
+    chipType = trainingParams["chipType"]
+    costFluctuationSingles = np.zeros(iterations)
+    costFluctuationDoubles = np.zeros(iterations)
+    
+    colorStart = '\033[92m'
+    colorStop = '\033[0m'
+    
+    for i in range(iterations):    
+        print(colorStart, "Iteration: ", i, colorStop)
+        costFluctuationSingles[i] = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, trainingParams, chipType)
+        costFluctuationDoubles[i] = lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
+        
+        strnow = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        outputString = strnow + "\n Iteration: " + str(i) + "\n    Loss Singles: " + str(costFluctuationSingles[i]) + "    Loss Doubles: " + str(costFluctuationDoubles[i]) +  "\n"
+        logFile.write(outputString)
+        logFileExtended.write(outputString)
+        logFile.flush()
+        logFileExtended.flush()
+    
+    
+    return costFluctuationSingles, costFluctuationDoubles
+    
+    
+
+
