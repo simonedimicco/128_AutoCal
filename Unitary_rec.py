@@ -357,7 +357,7 @@ for sequence in inputs:
     else:
         raise ValueError('Invalid number of chosen inputs')
 
-☻#%%
+#%%
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
