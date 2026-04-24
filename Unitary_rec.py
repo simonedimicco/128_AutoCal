@@ -183,6 +183,7 @@ print(f'You are going to set the following voltages:')
 print(volts)
 
 #%%
+<<<<<<< HEAD
 #after training  20_04_2026
 volts[0] = [32.87435446, 25.51647552]
 volts[1] = [35.16892697,  1.92600443]
@@ -194,6 +195,20 @@ volts[6] = [19.7476294 , 14.86927766]
 volts[7] = [9.54893315,  33.10534196]
 volts[8] = [27.83738406,  0.        ]
 volts[9] = [22.2375001 ,  0.        ]
+=======
+#after training  21_04_2026
+
+volts[0] = [31.74052433, 21.91479155]
+volts[1] = [34.01837048,  3.37147212]
+volts[2] = [22.64993622, 30.93264166]
+volts[3] = [20.49874402, 32.44260608]
+volts[4] = [23.5903211 , 29.66610636]
+volts[5] = [18.21220227, 18.5196574 ]
+volts[6] = [20.77825292, 15.89228753]
+volts[7] = [9.76500426,  26.72253415]
+volts[8] = [26.38833187,  0.        ]
+volts[9] = [19.77356721,  0.        ]
+>>>>>>> 48d618e7122efae6ef7437c6df51b276efa8b449
 volts_array = list( np.sqrt(volts))
 volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
