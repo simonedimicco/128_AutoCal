@@ -28,6 +28,7 @@ strnow = lambda: datetime.now().strftime("%Y%m%d-%H%M%S")
 strtoday = lambda: datetime.now().strftime("%Y_%m_%d")
 strtimenow = lambda: datetime.now().strftime("%H:%M:%S")
 import time
+import os
 #%%
 '''
 FUNCTIONS SECTION:
@@ -238,14 +239,6 @@ dmx = DMXController(log_level=logging.DEBUG)
 dmx.stop_looping()
 #%%
 print(dmx.get_data())
-#%%
-dwell_time=24
-dmx.set_dwell_time(channel=channel_a, dwell_time=dwell_time)
-dmx.set_dwell_time(channel=channel_b, dwell_time=dwell_time)
-dmx.set_dwell_time(channel=channel_c, dwell_time=dwell_time)
-dmx.set_dwell_time(channel=channel_d, dwell_time=dwell_time)
-dmx.set_dwell_time(channel=channel_e, dwell_time=dwell_time)
-dmx.set_dwell_time(channel=channel_f, dwell_time=dwell_time)
 
 #%%
 
@@ -259,11 +252,11 @@ dmx.set_dwell_time(channel=channel_f, dwell_time=16)
 '''
 SET WORKING DIRECTORY
 '''
-#%%exc
+#%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
 dir_name = path+'DATI_' + strtoday() + '_multifase_1'
 #dir_name = path+'misure_cluce_classica'
-import os
+
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 print(dir_name)
@@ -358,16 +351,19 @@ for sequence in inputs:
         raise ValueError('Invalid number of chosen inputs')
 
 #%%
+path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
 dir_name_sup = path+'DATI_' + strtoday() + '_ricostruzioni_ripetute'
 for kkk in range(5):
 
-    dir_name = os.path.join(dir_name_sup, f'measuremente_{kkk+1}')
+    dir_name = os.path.join(dir_name_sup, f'measurement_{kkk+1}')
     os.makedirs(dir_name, exist_ok=True)
-    print(dir_name)
-    save_path = dir_name
+    save_path = os.path.join(dir_name,'Ricostruzione_unitaria')
+    os.makedirs(save_path, exist_ok=True)
+
+    print(save_path)
     with open(os.path.join(path,dir_name) + '/'+"readme.txt", "w") as file:
         file.write("trigger ch 17 box 2\n")
         file.write('sync channels: ch 3 box 1 and ch 27 box 2\n')
@@ -383,9 +379,9 @@ for kkk in range(5):
         photons = len(sequence)
         
         if photons == 1:
-            folder_dark= os.path.join(save_path, f'measurement_dark_{names[sequence[0]-1]}')
+            folder_dark= os.path.join(save_path, 'Buio' ,f'{names[sequence[0]-1]}')
             os.makedirs(folder_dark, exist_ok=True )
-            folder_signal = os.path.join(save_path, f'measurement_1ph_{names[sequence[0]-1]}')
+            folder_signal = os.path.join(save_path, "Singles", f'{names[sequence[0]-1]}')
             os.makedirs(folder_signal, exist_ok=True )
             loop = setloop((0,))
             dmx.set_active_outputs(loop)

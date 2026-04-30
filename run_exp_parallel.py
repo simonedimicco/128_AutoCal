@@ -114,7 +114,7 @@ if __name__=="__main__":
     skippedParameters = [19, 17]
 
 
-    duration=6
+    duration=1
     exposition = 0.1
     repetitions_singles=1
     repetitions_doubles=10
@@ -165,7 +165,7 @@ if __name__=="__main__":
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    trainingName = "_128modi_training_target2_3PairsPre_32Start_1"
+    trainingName = "_128modi_training_target2_3PairsPre_32Start_2"
     fileName = path + "logs/" + strnow_DS + trainingName + ".txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
@@ -193,12 +193,13 @@ if __name__=="__main__":
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target2_3PairsPre_32Start_intermediate_1.npz"
+    savefileName = path + strnow_DS + "_128modi_training_target2_3PairsPre_32Start_intermediate_2.npz"
     np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
 
     # Second Step training
 
+    duration=6
     LR = 2
     LR_check = LR
     LR_move = LR
@@ -228,7 +229,7 @@ if __name__=="__main__":
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target2_3PairsPre_32Start_result_1.npz"
+    savefileName = path + strnow_DS + "_128modi_training_target2_3PairsPre_32Start_result_2.npz"
 
     np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
