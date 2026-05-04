@@ -202,6 +202,51 @@ volts_array = list( np.sqrt(volts))
 volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
 print(volts)
+
+
+#%%
+
+#refine 2026-05-01
+
+volts[0] = [30.72086116, 19.19779719]
+volts[1] = [29.07245286, 13.4723269]
+volts[2] = [11.24319881, 36.57669847]
+volts[3] = [18.14860641, 29.0169418]
+volts[4] = [34.31649245, 34.5729494]
+volts[5] = [25.97631842, 23.90355533]
+volts[6] = [23.69507688, 22.61472729]
+volts[7] = [10.47858461, 12.14714416]
+volts[8] = [20.72134531,  0.]
+volts[9] = [14.09070056,  0.]
+
+volts_array = list( np.sqrt(volts))
+volts = [[float(x), float(y)] for x, y in volts_array]
+print(f'You are going to set the following voltages:')
+print(volts)
+
+#%%
+
+#train 2026-05-02
+
+volts[0] = [42.07222399, 32.08724222]
+volts[1] = [34.30225481, 10.68487193] 
+volts[2] = [11.60007042, 32.47799552]
+volts[3] = [14.9079791,  24.37225923] 
+volts[4] = [12.58147829, 49.67670304] 
+volts[5] = [33.62438231, 46.89339419]
+volts[6] = [31.24192644, 25.09432715]
+volts[7] = [11.2817808,  45.83195757]
+volts[8] = [25.8980875,   0.]
+volts[9] = [21.45948571,  0.]
+
+
+volts_array = list( np.sqrt(volts))
+volts = [[float(x), float(y)] for x, y in volts_array]
+print(f'You are going to set the following voltages:')
+print(volts)
+
+
+
 #%%
 change_voltages(supply, volts)
 #%%
@@ -254,7 +299,7 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_multifase_1'
+dir_name = path+'DATI_' + strtoday() + '_trainedMultiphase_T3_1'
 #dir_name = path+'misure_cluce_classica'
 
 if not os.path.exists(dir_name):
@@ -323,6 +368,7 @@ for sequence in inputs:
             measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
             times = [(t,c) for t,c in measure]
             times_box_1,channels_box_1 = times[0]
+            
             times_box_2,channels_box_2 = times[1]
             t_tot, c_tot = process_measurement(times, photons=0)
             np.savez_compressed(save_name_signal, t_tot=t_tot, c_tot=c_tot)
@@ -351,12 +397,18 @@ for sequence in inputs:
         raise ValueError('Invalid number of chosen inputs')
 
 #%%
+
+volts_list=[[[6.716830805737016, 5.36288779733875], [5.717815318089045, 3.0761820323954265], [1.172416326046184, 5.3807901717541595], [4.200019408141096, 4.899959788076659], [3.3968124321210387, 7.205466461270522], [6.102944372617521, 7.011259265412013], [5.499486074853658, 4.765794116935913], [2.7015651801248453, 6.952332733788776], [4.987329575441109, 6.153184614077702], [4.731838211866537, 6.566338838670131]],
+            [[3.7571834800042203, 5.60357034969297], [6.001302461083623, 4.484974147168658], [1.1188172396702731, 4.129847068765342], [6.090797076969404, 4.276531393148299], [3.9294926278555193, 7.121751176683283], [6.7925478762068945, 4.142632654792215], [5.1290243363745684, 6.049494074089151], [5.479884239872771, 6.054888136429026], [2.70578495606311, 7.097692164460753], [2.3430116982714635, 4.422567885894527]],
+            [[2.350121525219097, 4.934346778801326], [3.0012653206619233, 7.1434515599797255], [1.53289683840483, 5.645604645393134], [4.022228744676502, 7.254877105894267], [1.5413442319670714, 7.344194593948546], [5.531677288235926, 6.1860519819754085], [3.3465608734289205, 6.260139087723224], [3.2007719979077907, 6.337437901810146], [2.9730811001952335, 7.30427932158127], [5.034055298424647, 5.263628121393482]]]
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
-dir_name_sup = path+'DATI_' + strtoday() + '_ricostruzioni_ripetute'
-for kkk in range(5):
+dir_name_sup = path+'DATI_' + strtoday() + '_target_multipli'
+for kkk in range(len(volts_list)):
+    volts= volts_list[kkk]
+    change_voltages(supply, volts)
 
     dir_name = os.path.join(dir_name_sup, f'measurement_{kkk+1}')
     os.makedirs(dir_name, exist_ok=True)
