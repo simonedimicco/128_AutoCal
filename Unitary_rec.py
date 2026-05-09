@@ -153,17 +153,17 @@ print(f'You are going to set the following voltages:')
 print(volts)
 
 #%%
-#all_20
-volts[0]=[20, 20]
-volts[1]=[20, 20]
-volts[2]=[20, 20]
-volts[3]=[20, 20]
-volts[4]=[20, 20]
-volts[5]=[20, 20]
-volts[6]=[20, 20]
-volts[7]=[20, 20]
-volts[8]=[20, 20]
-volts[9]=[20, 20]
+#all_32
+volts[0]=[32,32]
+volts[1]=[32,32]
+volts[2]=[32,32]
+volts[3]=[32,32]
+volts[4]=[32,32]
+volts[5]=[32,32]
+volts[6]=[32,32]
+volts[7]=[32,32]
+volts[8]=[32,32]
+volts[9]=[32,32]
 volts_array = list( np.sqrt(volts))
 volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
