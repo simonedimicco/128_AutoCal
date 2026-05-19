@@ -168,7 +168,7 @@ volts_array = list( np.sqrt(volts))
 volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
 print(f'You are going to set the following voltages:')
-print(volts)
+print(volts) 
 #%%
 # Target volts
 volts[0]= [5.601,4.346]
@@ -264,6 +264,26 @@ volts = [[float(x), float(y)] for x, y in volts_array]
 print(f'You are going to set the following voltages:')
 print(volts)
 
+#%%
+
+#train 2026-05-09
+
+volts[0] = [14.39049051, 28.15002025]
+volts[1] = [37.65470589, 13.39977229] 
+volts[2] = [14.56873359, 18.63295839]
+volts[3] = [39.11585625, 28.41213172] 
+volts[4] = [22.66075767, 47.39034064] 
+volts[5] = [27.49882012, 13.07486527]
+volts[6] = [28.40026743, 32.49478222]
+volts[7] = [29.21095819, 37.66423998]
+volts[8] = [13.29558992,   0.]
+volts[9] = [10.84850044,  0.]
+
+
+volts_array = list( np.sqrt(volts))
+volts = [[float(x), float(y)] for x, y in volts_array]
+print(f'You are going to set the following voltages:')
+print(volts)
 
 
 #%%
@@ -318,7 +338,7 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_trainedMultiphase_T3_1'
+dir_name = path+'DATI_' + strtoday() + '_T4_3P_32S_F2'
 #dir_name = path+'misure_cluce_classica'
 
 if not os.path.exists(dir_name):

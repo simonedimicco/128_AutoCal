@@ -81,7 +81,7 @@ if __name__=="__main__":
     '''
     TARGET DEFINITION
     '''
-    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_3'
+    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_5'
     # target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_all20'
     with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
         targetSingles = data['distributions']
@@ -165,7 +165,7 @@ if __name__=="__main__":
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    trainingName = "_128modi_training_target3_3PairsPre_32Start_1"
+    trainingName = "_128modi_training_target5_3PairsPre_32Start_1"
     fileName = path + "logs/" + strnow_DS + trainingName + ".txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
@@ -193,7 +193,7 @@ if __name__=="__main__":
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target3_3PairsPre_32Start_intermediate_1.npz"
+    savefileName = path + strnow_DS + trainingName + "_intermediate.npz"
     np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
 
@@ -229,7 +229,7 @@ if __name__=="__main__":
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target3_3PairsPre_32Start_resultF1_1.npz"
+    savefileName = path + strnow_DS + trainingName + "_resultF1.npz"
 
     np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
@@ -238,7 +238,7 @@ if __name__=="__main__":
     # Third Step training
 
     duration=6
-    LR = 1
+    LR = 0.5
     LR_check = LR
     LR_move = LR
     epochsNum = 36
@@ -267,7 +267,7 @@ if __name__=="__main__":
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target3_3PairsPre_32Start_resultF2_1.npz"
+    savefileName = path + strnow_DS + trainingName + "_resultF2.npz"
 
     np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
@@ -275,39 +275,39 @@ if __name__=="__main__":
 
     # Fourth Step training
 
-    duration=6
-    LR = 0.5
-    LR_check = LR
-    LR_move = LR
-    epochsNum = 36
-    useTwoPhotons = True
-    checkPairsNum = 3
-    
-    trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset, "chipType": chipType, "duration": duration, "repetitions_singles": repetitions_singles, "repetitions_doubles": repetitions_doubles, "skippedParameters": skippedParameters}           
+#    duration=6
+#    LR = 0.5
+#    LR_check = LR
+#    LR_move = LR
+#    epochsNum = 36
+#    useTwoPhotons = True
+#    checkPairsNum = 3
+#    
+#    trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset, "chipType": chipType, "duration": duration, "repetitions_singles": repetitions_singles, "repetitions_doubles": repetitions_doubles, "skippedParameters": skippedParameters}           
+#
+#    
+#    outputString = "Training Phase 4 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
 
-    
-    outputString = "Training Phase 4 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
-
-    logFile.write(outputString)
-    logFileExtended.write(outputString)
-    
-    logFileExtended.write(str(trainingParams))
-    logFileExtended.write("\n")
-    
-    logFile.flush()
-    logFileExtended.flush()
+#    logFile.write(outputString)
+#    logFileExtended.write(outputString)
+#    
+#    logFileExtended.write(str(trainingParams))
+#    logFileExtended.write("\n")
+#    
+#    logFile.flush()
+#    logFileExtended.flush()
     
 
-    currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
+#    currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
 
 
     #for epoch in range(n_epochs):
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_training_target3_3PairsPre_32Start_resultF3_1.npz"
+#    savefileName = path + strnow_DS + trainingName + "_resultF3.npz"
 
-    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
+#    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
 
 
