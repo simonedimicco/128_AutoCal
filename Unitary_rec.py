@@ -338,16 +338,14 @@ SET WORKING DIRECTORY
 '''
 #%%
 path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
-dir_name = path+'DATI_' + strtoday() + '_T4_3P_32S_F2'
+dir_name = 'DATI_' + strtoday() + '_T4_3P_32S_F2'
 #dir_name = path+'misure_cluce_classica'
+os.makedirs(os.path.join(path, dir_name), exist_ok=True)
+print(os.path.join(path, dir_name))
 
-if not os.path.exists(dir_name):
-    os.mkdir(dir_name)
-print(dir_name)
-save_path = dir_name
 
 #%%
-with open(os.path.join(path,dir_name) + '/'+"readme.txt", "w") as file:
+with open(os.path.join(path, dir_name)+ '/'+"readme.txt", "w") as file:
     file.write("target 1\t3 coppie\t start target2\n")
     file.write("trigger ch 17 box 2\n")
     file.write('sync channels: ch 3 box 1 and ch 27 box 2\n')
@@ -370,7 +368,7 @@ ripetizioni= int(durata/esposizione)
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
-save_path = os.path.join(dir_name,'Ricostruzione_unitaria')
+save_path = os.path.join(path, dir_name, 'Ricostruzione_unitaria')
 os.makedirs(save_path, exist_ok=True)
 
 for sequence in inputs:

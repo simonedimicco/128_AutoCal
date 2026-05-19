@@ -13,7 +13,7 @@ import numpy as np
 from numba import njit
 import time 
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
-from WhiteLib import change_voltages, data_collection
+from WhiteLib import change_voltages, data_collection, process_measurement
 from PurpleLib128Modes import myTrainingLoopExp, lossEvalExp
 import pyvisa as visa
 from tqdm import tqdm
@@ -23,6 +23,46 @@ from datetime import datetime
 strnow = lambda: datetime.now().strftime("%Y%m%d-%H%M%S")
 strtoday = lambda: datetime.now().strftime("%Y_%m_%d")
 strtimenow = lambda: datetime.now().strftime("%H:%M:%S")
+
+
+def setloop(input):
+    loop =[0,0,0,5]
+    for channel in input:
+        if channel != 0 and channel != 5:
+            loop[channel-1]=channel 
+        else:
+            print('You are measuring the dark')
+
+    return loop
+
+def control_volts(pairs):
+    """
+    Controlla ogni coppia in `pairs`: se uno dei due valori 0 o > 8,
+    stampa un errore e imposta la coppia a [0, 0].
+    """
+    for idx, (a, b) in enumerate(pairs):
+        # verifica se a o b sono fuori dall'intervallo 0\Uffffffff8
+        if not (0 <= a <= 8 and 0 <= b <= 8):
+            print(f"Errore: elementi fuori range in pairs[{idx}] = {pairs[idx]}")
+            return False
+    
+    return True
+def flatten_list(pairs):
+    # prende ogni coppia in pairs e ogni elemento x in quella coppia
+    return [x for pair in pairs for x in pair]
+
+def change_voltages(supply: PowerSupplies, volts) -> None:
+    assert isinstance(supply, PowerSupplies)
+    assert isinstance(volts, list)
+    assert supply._num_supplies==len(volts)
+    if control_volts(volts):  
+        volts = flatten_list(volts)
+        supply.voltages = volts
+        print('Volts changed ->' + str(supply.voltages))
+    else:
+        volts = [[0, 0] for _ in range(supply._num_supplies)]
+        supply.voltages = flatten_list(volts)
+        print('Volts reset to 0 due to error ->' + str(supply.voltages))
 
 if __name__=="__main__":
 
@@ -271,6 +311,8 @@ if __name__=="__main__":
 
     np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
+    
+
 
 
     # Fourth Step training
@@ -327,6 +369,102 @@ if __name__=="__main__":
     logFileExtended.close()
         
     
+
+    path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
+    dir_name = path+'DATI_' + strtoday() + trainingName
+    #dir_name = path+'misure_cluce_classica'
+    if not os.path.exists(dir_name):
+        os.mkdir(dir_name)
+    print(dir_name)
+    save_path = dir_name
+
+
+    with open(os.path.join(path,dir_name) + '/'+"readme.txt", "w") as file:
+        file.write("target 1\t3 coppie\t start target2\n")
+        file.write("trigger ch 17 box 2\n")
+        file.write('sync channels: ch 3 box 1 and ch 27 box 2\n')
+        file.write("voltages:\n")
+        for voltage in supply.voltages_measure:
+            file.write(f"{voltage:.3f}\n")
+        file.write("currents:\n")
+        for curr in supply.currents_measure:
+            file.write(f'{curr:.3e}\n')
+    esposizione = 0.1   #in secondi
+    durata= 60   #in secondi
+    ripetizioni= int(durata/esposizione)
+
+    volts_array = np.sqrt(currentParamsTrainable)
+    volts_array = np.reshape(volts_array, (len(volts_array)//2,2))
+    volts = volts_array.tolist()
+    change_voltages(supply, volts)
+
+    names=['b','c', 'd', 'e']
+    #Voltages=[0 for _ in range(len(addresses))]
+    inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
+    save_path = os.path.join(dir_name,'Ricostruzione_unitaria')
+    os.makedirs(save_path, exist_ok=True)
+
+    for sequence in inputs:
+        
+        photons = len(sequence)
+        
+        if photons == 1:
+            folder_dark= os.path.join(save_path, 'Buio' ,f'{names[sequence[0]-1]}')
+            os.makedirs(folder_dark, exist_ok=True )
+            folder_signal = os.path.join(save_path, "Singles", f'{names[sequence[0]-1]}')
+            os.makedirs(folder_signal, exist_ok=True )
+            loop = setloop((0,))
+            dmx.set_active_outputs(loop)
+            time.sleep(1)
+            
+            for i in range(5):
+                print(f'Dark measurement channel {names[sequence[0]-1]} {i+1}/5 - started at {strtimenow()}')
+                save_name_dark = os.path.join(folder_dark, f'misura_{i+1}')
+                measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+                times = [(t,c) for t,c in measure]
+                times_box_1,channels_box_1 = times[0]
+                times_box_2,channels_box_2 = times[1]
+                t_tot, c_tot = process_measurement(times, photons=0)
+                np.savez_compressed(save_name_dark, t_tot=t_tot, c_tot=c_tot)
+            dmx.stop_looping()
+            time.sleep(1)
+            loop = setloop(sequence)
+            dmx.set_active_outputs(loop)
+            time.sleep(1)
+            
+            for i in range(5):
+                print(f'Singles measurement channel {names[sequence[0]-1]} {i+1}/5 - started at {strtimenow()}')
+                save_name_signal = os.path.join(folder_signal, f'misura_{i+1}')
+                measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+                times = [(t,c) for t,c in measure]
+                times_box_1,channels_box_1 = times[0]
+                
+                times_box_2,channels_box_2 = times[1]
+                t_tot, c_tot = process_measurement(times, photons=0)
+                np.savez_compressed(save_name_signal, t_tot=t_tot, c_tot=c_tot)
+            dmx.stop_looping()
+            time.sleep(1)
+            
+        elif photons==2:
+            folder_couples= os.path.join(save_path, f'measurement_2ph_{names[sequence[0]-1]}{names[sequence[1]-1]}')
+            os.makedirs(folder_couples, exist_ok=True )
+            loop = setloop(sequence)
+            dmx.set_active_outputs(loop)
+            time.sleep(1)
+            for i in range(20):
+                print(f'Couples measurement channels {names[sequence[0]-1]}{names[sequence[1]-1]} {i+1}/20 - started at {strtimenow()}')
+                save_name_couples = os.path.join(folder_couples, f'misura_{i+1}')
+                measure = counting.get_raw_timestamps_multiple(boxes,esposizione,num_acq=ripetizioni)
+                times = [(t,c) for t,c in measure]
+                times_box_1,channels_box_1 = times[0]
+                times_box_2,channels_box_2 = times[1]
+                t_tot, c_tot = process_measurement(times, photons=0)
+                np.savez_compressed(save_name_couples, t_tot=t_tot, c_tot=c_tot)
+            dmx.stop_looping()
+            time.sleep(1)
+            
+        else:
+            raise ValueError('Invalid number of chosen inputs')
     # Da far girare se non si e' salvato prima
 
     #savefileName = path + strnow_DS + "_128modi_training_target1_result_1.npz"

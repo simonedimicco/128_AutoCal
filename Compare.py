@@ -18,8 +18,8 @@ def Frobenius_norm(A):
     return 0.5*np.sqrt(np.sum(np.abs(A)**2))
 
 path  = '/media/dati_2'
-folder_1 = 'DATI_2026_04_30_target_multipli/measurement_1'
-folder_2 = 'DATI_2026_05_03_trainedMultiphase_T3_1'
+folder_1 = 'DATI_2026_04_30_target_multipli/Target_3'
+folder_2 = 'DATI_2026_05_07_misure_intermedie_2/measurement_2/'
 subfolder = 'Ricostruzione_unitaria'
 file_name = 'Unitary_mat.npz'
 
