@@ -447,10 +447,12 @@ volts_list=[[[6.89765693666106, 5.312488106125661], [3.630398718260098, 3.782678
 #2026-05-02_16-31-34_128modi_training_target3_3PairsPre_32Start_resultF2_1
 #2026-05-02_16-31-34_128modi_training_target3_3PairsPre_32Start_resultF1_1
 #2026-05-02_16-31-34_128modi_training_target3_3PairsPre_32Start_intermediate_1
-volts_list=[[[6.484363489934788, 5.685906611667912], [5.854941573618467, 3.3918464744900674], [3.552527562644707, 5.771887719094912], [3.7288976501017577, 4.827180531407561], [3.6096627362526044, 7.076716113415171], [5.837358192324938, 6.813276701783147], [5.627177639503878, 5.029387034472074], [3.4750873492021035, 6.793868151000515], [5.1310601878711015, 0.0], [4.695200098436315, 0.0]],
-            [[6.424368734543291, 5.772576561358753], [5.703219239360495, 3.648073169280633], [3.764355008566168, 5.705639833182349], [3.8382897087152132, 4.7462416520434125], [3.717778156163042, 7.01823099166367], [5.772129378937554, 6.698438853870754], [5.7014731424605625, 5.105573709341112], [3.583264460605313, 6.676635317553235], [5.1310601878711015, 0.0], [4.68166646197984, 0.0]]]
-
+volts_list=[[[0,0] for _ in range(len(addresses))],
+            [[60,60] for _ in range(len(addresses))],
+            [[5.601,4.346],[5.367,3.763],[3.396,5.966],[4.299,5.298],[5.832,5.795],[5.099,4.853],[4.801,4.724],[3.132,3.577],[4.594,0],[3.842,0]],
+            ]
 #%%
+titles = ['all0', 'all60', 'target1', '2026-05-18_16-47-08_128modi_training_target5_3PairsPre_32Start_1_intermediate']
 esposizione = 0.1   #in secondi
 durata= 60   #in secondi
 ripetizioni= int(durata/esposizione)    
@@ -458,12 +460,12 @@ path='C:/Users/ControlCenter/Desktop/128_AutoCal_dati/'
 names=['b','c', 'd', 'e']
 #Voltages=[0 for _ in range(len(addresses))]
 inputs = [(1,), (2,), (3,), (4,), (1,2), (1,3), (1,4), (2,3), (2,4), (3,4)]
-dir_name_sup = path+'DATI_' + strtoday() + '_target_ripetuti'
+dir_name_sup = path+'DATI_' + strtoday() + '_misure_multiple'
 for kkk in range(len(volts_list)):
     volts= volts_list[kkk]
     change_voltages(supply, volts)
 
-    dir_name = os.path.join(dir_name_sup, f'measurement_{kkk+1}')
+    dir_name = os.path.join(dir_name_sup, f'{titles[kkk]}')
     os.makedirs(dir_name, exist_ok=True)
     save_path = os.path.join(dir_name,'Ricostruzione_unitaria')
     os.makedirs(save_path, exist_ok=True)

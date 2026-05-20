@@ -114,7 +114,7 @@ if __name__=="__main__":
     skippedParameters = [19, 17]
 
 
-    iterations = 10
+    iterations = 50
     duration = 6
     exposition = 0.1
     repetitions_singles=1
@@ -146,74 +146,69 @@ if __name__=="__main__":
 
 
 
-    #target1 params
+    paramToCheck = 0
+    compSize = 61
+    
     tempArr = np.array((5.601,4.346, 5.367,3.763,3.396,5.966,4.299,5.298,5.832,5.795,5.099,4.853,4.801,4.724,3.132,3.577,4.594,5.756,3.842,5.787))
-
-    #target2 params
-    #tempArr = np.array((4.982, 6.744, 5.936, 4.612, 6.481, 5.619, 6.817, 4.076, 4.217, 2.074, 4.483, 5.363, 5.077, 1.618, 4.077, 7.307, 5.451, 1.067, 6.470, 6.944))
-
+    #tempArr2 = tempArr + (np.random.rand(len(tempArr))) - 0.5
     tempArr2 = tempArr**2
     print(tempArr2)
     currentParamsTrainable = tempArr2
-    #currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
-    currentParamsTrainable[19] = 0.0
-    currentParamsTrainable[17] = 0.0
+    currentParamsTrainable[paramToCheck] = 2
     print(currentParamsTrainable)
-
+    
+    costFluctuationSingles = np.zeros(compSize)
+    costFluctuationDoubles = np.zeros(compSize)
+    
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    fileName = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_6.txt"
-    #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
+    fileName = path + "logs/" + strnow_DS + "_128modi_LossLandscape_target1_param0_4.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
-    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_6_extended.txt"
-    logFileExtended = open(fileNameExtended, 'w', encoding="utf-8")
-
-    outputString = "Starting parameters: " + str(currentParamsTrainable) + "\n"
-
-    logFile.write(outputString)
-    logFileExtended.write(outputString)
-
+    
+    logFile.write("Starting parameters: ")
+    logFile.write(str(currentParamsTrainable))
+    logFile.write("\n")
     logFile.flush()
-    logFileExtended.flush()
-
+    
     logging.disable(logging.DEBUG)
-  
-    costFluctuationSingles, costFluctuationDoubles, countsSingles, countsDoubles = StabilityMeasure(currentParamsTrainable, iterations, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams, paramsUnitary = [])
-
-
-    #for epoch in range(n_epochs):
-        #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
-
-
-    savefileName = path + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_6.npz"
-    np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles, countsSingles, countsDoubles)
-
-
+    
+    
+    for i in range(compSize):
+        logFile.write("Parameter Value: ")
+        logFile.write(str(currentParamsTrainable[paramToCheck]))
+        
+        costFluctuationSingles[i] = lossEvalExp(currentParamsTrainable, input_states_one, targetSingles, trainingParams, chipType)
+        
+        logFile.write("    Loss Singles: ")
+        logFile.write(str(costFluctuationSingles[i]))
+        
+        costFluctuationDoubles[i] = lossEvalExp(currentParamsTrainable, input_states_two_full, targetDoubles, trainingParams, chipType)
+        
+        logFile.write("    Loss Doubles: ")
+        logFile.write(str(costFluctuationDoubles[i]))
+        logFile.write("\n")
+        logFile.flush()
+        
+        currentParamsTrainable[paramToCheck] =  currentParamsTrainable[paramToCheck] + 1
+        print(i)
+    
+    
+    
+    savefileName = path + strnow_DS + "_128modi_LossLandscape_target1_param0_4.npz"
+    
+    np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles)
+    
     #set voltages to 0
     volts = [[0,0] for _ in range(len(addresses))]
     change_voltages(supply, volts)
+    
+    logFile.write("Code execution completed successfully.\n")
         
     logFile.close()
-    logFileExtended.close()
-        
     
-    # Da far girare se non si e' salvato prima
-
-    #savefileName = path + strnow_DS + "_128modi_training_target1_result_1.npz"
-
-    #np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss)
-
+    print("Loss Landscape completata con successo e salvati i risultati. Potete ora fare altre misure.")
     
-
-    #logFile.close()
-    #logging.disable(logging.DEBUG)
-    #dmx.stop_looping()
-    ##set voltages to 0
-    #volts = [[0,0] for _ in range(len(addresses))]
-    #change_voltages(supply, volts)
     
-
-
-        
+            
 
 
 

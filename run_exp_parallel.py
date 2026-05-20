@@ -205,7 +205,7 @@ if __name__=="__main__":
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    trainingName = "_128modi_training_target5_3PairsPre_32Start_1"
+    trainingName = "_128modi_training_target5_3PairsPre_32Start_2"
     fileName = path + "logs/" + strnow_DS + trainingName + ".txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
@@ -278,10 +278,10 @@ if __name__=="__main__":
     # Third Step training
 
     duration=6
-    LR = 0.5
+    LR = 1
     LR_check = LR
     LR_move = LR
-    epochsNum = 36
+    epochsNum = 18
     useTwoPhotons = True
     checkPairsNum = 3
     
@@ -317,39 +317,39 @@ if __name__=="__main__":
 
     # Fourth Step training
 
-#    duration=6
-#    LR = 0.5
-#    LR_check = LR
-#    LR_move = LR
-#    epochsNum = 36
-#    useTwoPhotons = True
-#    checkPairsNum = 3
-#    
-#    trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset, "chipType": chipType, "duration": duration, "repetitions_singles": repetitions_singles, "repetitions_doubles": repetitions_doubles, "skippedParameters": skippedParameters}           
-#
-#    
-#    outputString = "Training Phase 4 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
+    duration=6
+    LR = 0.5
+    LR_check = LR
+    LR_move = LR
+    epochsNum = 36
+    useTwoPhotons = True
+    checkPairsNum = 3
+    
+    trainingParams = {"epochsNum" : epochsNum, "LR_check" : LR_check, "LR_move" : LR_move, "useTwoPhotons" : useTwoPhotons, "typeTraining" : typeTraining, "typeOrder" : typeOrder, "printProgress" : printProgress, "checkPairsNum" : checkPairsNum, "firstNeighbourList": firstNeighbourList, "avoidBoundary": avoidBoundary, "supply": supply, "Nsupp": Nsupp, "boxes": boxes, "dmx": dmx, "exposition": exposition, "parameterValueMin": parameterValueMin, "parameterValueMax": parameterValueMax, "parameterValueMinReset": parameterValueMinReset, "parameterValueMaxReset": parameterValueMaxReset, "chipType": chipType, "duration": duration, "repetitions_singles": repetitions_singles, "repetitions_doubles": repetitions_doubles, "skippedParameters": skippedParameters}           
 
-#    logFile.write(outputString)
-#    logFileExtended.write(outputString)
-#    
-#    logFileExtended.write(str(trainingParams))
-#    logFileExtended.write("\n")
-#    
-#    logFile.flush()
-#    logFileExtended.flush()
+    
+    outputString = "Training Phase 4 Start \n" + "Starting parameters: " + str(currentParamsTrainable) + "\n"
+
+    logFile.write(outputString)
+    logFileExtended.write(outputString)
+    
+    logFileExtended.write(str(trainingParams))
+    logFileExtended.write("\n")
+    
+    logFile.flush()
+    logFileExtended.flush()
     
 
-#    currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
+    currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory = myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targetSingles, input_states_two_full, targetDoubles, logFile, logFileExtended, trainingParams)
 
 
     #for epoch in range(n_epochs):
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-#    savefileName = path + strnow_DS + trainingName + "_resultF3.npz"
+    savefileName = path + strnow_DS + trainingName + "_resultF3.npz"
 
-#    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
+    np.savez(savefileName, currentParamsTrainable, lossHistory, bestParams, bestLoss, lossUpHistory, lossDownHistory)
 
 
 

@@ -273,6 +273,23 @@ def myTrainingLoopExp(currentParamsTrainable, numParams, input_states_one, targe
 
 # Varie funzioni training.
 
+def lossEvalExp128Feedback(parameters, inputs, target, trainingParams, chipType):
+    #parameters_reshaped = np.reshape(parameters, (Nsupp, 2))
+    duration = trainingParams["duration"]
+    repetitions_singles = trainingParams["repetitions_singles"]
+    repetitions_doubles = trainingParams["repetitions_doubles"]
+    supply = trainingParams["supply"]
+    Nsupp = trainingParams["Nsupp"]
+    boxes = trainingParams["boxes"]
+    exposition = trainingParams["exposition"]
+    dmx = trainingParams["dmx"]
+
+    tempPrediction = data_collection_parallel(inputs, np.sqrt(parameters), supply, Nsupp, dmx, boxes, exposition, duration, repetitions_singles, repetitions_doubles)
+    tempLoss = MyMaeExp(tempPrediction, target)
+    #print(tempLoss)
+    return tempLoss, tempPrediction
+
+
 def StabilityMeasure(currentParamsTrainable, iterations, input_states_one, targetState1, input_states_two, targetState2, logFile, logFileExtended, trainingParams, paramsUnitary = []):
     epochsNum = trainingParams["epochsNum"]
     useTwoPhotons = trainingParams["useTwoPhotons"]
@@ -286,23 +303,26 @@ def StabilityMeasure(currentParamsTrainable, iterations, input_states_one, targe
     costFluctuationSingles = np.zeros(iterations)
     costFluctuationDoubles = np.zeros(iterations)
     
+    countsSingles = np.zeros((iterations, 4, 128))
+    countsDoubles = np.zeros((iterations, 6, 16384))
+    
     colorStart = '\033[92m'
     colorStop = '\033[0m'
     
     for i in range(iterations):    
         print(colorStart, "Iteration: ", i, colorStop)
-        costFluctuationSingles[i] = lossEvalExp(currentParamsTrainable, input_states_one, targetState1, trainingParams, chipType)
-        costFluctuationDoubles[i] = lossEvalExp(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
+        costFluctuationSingles[i], countsSingles[i] = lossEvalExp128Feedback(currentParamsTrainable, input_states_one, targetState1, trainingParams, chipType)
+        costFluctuationDoubles[i], countsDoubles[i] = lossEvalExp128Feedback(currentParamsTrainable, input_states_two, targetState2, trainingParams, chipType)
         
         strnow = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        outputString = strnow + "\n Iteration: " + str(i) + "\n    Loss Singles: " + str(costFluctuationSingles[i]) + "    Loss Doubles: " + str(costFluctuationDoubles[i]) +  "\n"
+        outputString = strnow + "\n Iteration: " + str(i) + "\n    Loss Singles: " + str(costFluctuationSingles[i]) + "    Loss Doubles: " + str(costFluctuationDoubles[i]) + "    Counts Singles: " + str(np.sum(countsSingles[i])) + "    Counts Doubles: " + str(np.sum(countsDoubles[i])) +  "\n"
         logFile.write(outputString)
         logFileExtended.write(outputString)
         logFile.flush()
         logFileExtended.flush()
     
     
-    return costFluctuationSingles, costFluctuationDoubles
+    return costFluctuationSingles, costFluctuationDoubles, countsSingles, countsDoubles
     
     
 
