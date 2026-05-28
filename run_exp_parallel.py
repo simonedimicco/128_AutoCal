@@ -121,7 +121,7 @@ if __name__=="__main__":
     '''
     TARGET DEFINITION
     '''
-    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_5'
+    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_9'
     # target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_all20'
     with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
         targetSingles = data['distributions']
@@ -205,7 +205,7 @@ if __name__=="__main__":
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    trainingName = "_128modi_training_target5_3PairsPre_32Start_2"
+    trainingName = "_128modi_training_target9_3PairsPre_32Start_1"
     fileName = path + "logs/" + strnow_DS + trainingName + ".txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
@@ -379,6 +379,15 @@ if __name__=="__main__":
     save_path = dir_name
 
 
+
+    esposizione = 0.1   #in secondi
+    durata= 60   #in secondi
+    ripetizioni= int(durata/esposizione)
+
+    volts_array = np.sqrt(currentParamsTrainable)
+    volts_array = np.reshape(volts_array, (len(volts_array)//2,2))
+    volts = volts_array.tolist()
+    change_voltages(supply, volts)
     with open(os.path.join(path,dir_name) + '/'+"readme.txt", "w") as file:
         file.write("target 1\t3 coppie\t start target2\n")
         file.write("trigger ch 17 box 2\n")
@@ -389,14 +398,6 @@ if __name__=="__main__":
         file.write("currents:\n")
         for curr in supply.currents_measure:
             file.write(f'{curr:.3e}\n')
-    esposizione = 0.1   #in secondi
-    durata= 60   #in secondi
-    ripetizioni= int(durata/esposizione)
-
-    volts_array = np.sqrt(currentParamsTrainable)
-    volts_array = np.reshape(volts_array, (len(volts_array)//2,2))
-    volts = volts_array.tolist()
-    change_voltages(supply, volts)
 
     names=['b','c', 'd', 'e']
     #Voltages=[0 for _ in range(len(addresses))]

@@ -161,10 +161,10 @@ if __name__=="__main__":
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    fileName = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_6.txt"
+    fileName = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_7.txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
-    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_6_extended.txt"
+    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_7_extended.txt"
     logFileExtended = open(fileNameExtended, 'w', encoding="utf-8")
 
     outputString = "Starting parameters: " + str(currentParamsTrainable) + "\n"
@@ -184,7 +184,7 @@ if __name__=="__main__":
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_6.npz"
+    savefileName = path + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_7.npz"
     np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles, countsSingles, countsDoubles)
 
 
