@@ -81,7 +81,7 @@ if __name__=="__main__":
     '''
     TARGET DEFINITION
     '''
-    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target'
+    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_1_new'
     # target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_all20'
     with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
         targetSingles = data['distributions']
@@ -111,10 +111,10 @@ if __name__=="__main__":
     #shotSize1 = int(1e4)
     #shotSize2 = int(1e4)
     chipType = "128Modi"
-    skippedParameters = [19, 17]
+    skippedParameters = [19, 17, 18]
 
 
-    iterations = 10
+    iterations = 30
     duration = 6
     exposition = 0.1
     repetitions_singles=1
@@ -157,14 +157,15 @@ if __name__=="__main__":
     currentParamsTrainable = tempArr2
     #currentParamsTrainable = tempArr2 + (np.random.rand(len(tempArr)) * 10) - 5
     currentParamsTrainable[19] = 0.0
+    currentParamsTrainable[18] = 0.0
     currentParamsTrainable[17] = 0.0
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    fileName = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_7.txt"
+    fileName = path + "logs/" + strnow_DS + "_128modi_stability_T1N_duration6_rep1-10_1.txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
-    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_7_extended.txt"
+    fileNameExtended = path + "logs/" + strnow_DS + "_128modi_stability_T1N_duration6_rep1-10_1_extended.txt"
     logFileExtended = open(fileNameExtended, 'w', encoding="utf-8")
 
     outputString = "Starting parameters: " + str(currentParamsTrainable) + "\n"
@@ -184,7 +185,7 @@ if __name__=="__main__":
         #distributions = data_collection(inputs, Voltages, supply, len(addresses), boxes, dmx, exposition= 0.1, duration=60, repetitions_singles=1, repetitions_doubles=2)
 
 
-    savefileName = path + strnow_DS + "_128modi_stability_T1_duration6_rep1-10_7.npz"
+    savefileName = path + strnow_DS + "_128modi_stability_T1N_duration6_rep1-10_1.npz"
     np.savez(savefileName, currentParamsTrainable, costFluctuationSingles, costFluctuationDoubles, countsSingles, countsDoubles)
 
 

@@ -121,7 +121,7 @@ if __name__=="__main__":
     '''
     TARGET DEFINITION
     '''
-    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_9'
+    target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_6_new'
     # target_path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/Target_all20'
     with np.load(os.path.join(target_path, 'singles_distributions.npz')) as data:
         targetSingles = data['distributions']
@@ -151,7 +151,7 @@ if __name__=="__main__":
     #shotSize1 = int(1e4)
     #shotSize2 = int(1e4)
     chipType = "128Modi"
-    skippedParameters = [19, 17]
+    skippedParameters = [19, 17, 18]
 
 
     duration=1
@@ -165,15 +165,16 @@ if __name__=="__main__":
     useTwoPhotons = False
     #checkPairsNum = 3
     checkPairsNum = 0
-    LR = 8
+    #LR = 8
     #LR = 1
     #LR = 0.05
     #LR = 0.005
-    #LR = 0.01
+    LR = 0.01
     LR_check = LR
     #LR_move = LR * 5
     LR_move = LR
-    epochsNum = 90
+    # epochsNum = 85
+    epochsNum = 17
     trainingRepetitions = 10
     printProgress = "all"                     # "off", "last", "all"
     avoidBoundary = True
@@ -200,12 +201,15 @@ if __name__=="__main__":
     
     currentParamsTrainable = np.ones(20) * 32
     
+    currentParamsTrainable = np.array([36.898111,   32.80217089, 11.52888407, 17.9281463,  18.9094583,  48.66860004, 37.67956326, 27.39603444, 43.35872586, 10.8022499,  19.28059892, 12.70916748, 13.13232319, 11.28184071, 38.38147394, 41.70796682, 20.59657715,  0., 0.,  0.        ])
+    
     currentParamsTrainable[19] = 0.0
+    currentParamsTrainable[18] = 0.0
     currentParamsTrainable[17] = 0.0
     print(currentParamsTrainable)
 
     strnow_DS = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    trainingName = "_128modi_training_target9_3PairsPre_32Start_1"
+    trainingName = "_128modi_training_target6N_3PairsPre_32Start_resumed_1"
     fileName = path + "logs/" + strnow_DS + trainingName + ".txt"
     #fileName = path + "logs/" + strnow_DS + "_128modi_test.txt"
     logFile = open(fileName, 'w', encoding="utf-8")
@@ -243,7 +247,8 @@ if __name__=="__main__":
     LR = 2
     LR_check = LR
     LR_move = LR
-    epochsNum = 36
+    #epochsNum = 34
+    epochsNum = 17
     useTwoPhotons = True
     checkPairsNum = 3
     
@@ -281,7 +286,7 @@ if __name__=="__main__":
     LR = 1
     LR_check = LR
     LR_move = LR
-    epochsNum = 18
+    epochsNum = 17
     useTwoPhotons = True
     checkPairsNum = 3
     
@@ -321,7 +326,7 @@ if __name__=="__main__":
     LR = 0.5
     LR_check = LR
     LR_move = LR
-    epochsNum = 36
+    epochsNum = 34
     useTwoPhotons = True
     checkPairsNum = 3
     
