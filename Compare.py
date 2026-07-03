@@ -16,11 +16,14 @@ def compute_similarity(A, B):
 @njit
 def Frobenius_norm(A):
     return 0.5*np.sqrt(np.sum(np.abs(A)**2))
+@njit
+def comp_MyNorm(pred, target):
+    return 0.5*(np.sum(np.abs(pred - target)))
 
 path  = '/media/dati_2'
-folder_1 = 'DATI_2026_06_05_misure_multiple/2026-05-25_03-52-37_128modi_training_target9_3PairsPre_32Start_1_resultF2'
-folder_2 = 'DATI_2026_05_09_all32'
-#folder_2 = 'DATI_2026_05_27_misure_multiple/target_9_new'
+folder_1 = 'DATI_2026_04_14_ricostruzioni_ripetute/measuremente_4'
+folder_2 = 'DATI_2026_04_14_ricostruzioni_ripetute/measuremente_3'
+#folder_2 = 'DATI_2026_05_19_misure_multiple/target1'
 subfolder = 'Ricostruzione_unitaria'
 file_name = 'Unitary_mat.npz'
 
@@ -54,3 +57,5 @@ for i in range(4):
 print(f"Frobenius Norm of the difference: {norm:.6f}")
 print(f"Size of U_1: {size_U_1:.6f}")
 print(f"Size of U_2: {size_U_2:.6f}")
+
+print(f'L1 norm of the difference: {comp_MyNorm(U_1, U_2):.6f}')

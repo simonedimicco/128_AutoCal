@@ -48,3 +48,60 @@ plt.xticks(x_17)
 plt.savefig('./Immagini/frob_17.pdf')  # Salva la figura per Frob_17
 
 # %%
+'''
+FIGURE STABILITÀ
+'''
+#%%
+with np.load("/media/dati_2/results/2026-06-15_02-28-13_128modi_stability_T1N_duration6_rep1-10_2.npz") as temp:
+    stabilitySingles = temp["arr_1"]
+    stabilityDoubles = temp["arr_2"]
+    print(temp.keys())
+#%%
+colorsArray = ["darkviolet", "orange", "green", "red"]
+
+labelSize = 28
+
+# fig, axs = plt.subplots(2, 1, dpi=200, figsize=(6, 11))
+
+# fig.tight_layout()
+
+# fig.subplots_adjust( wspace=0.3, hspace=0.4)
+x = np.linspace(0,14, len(stabilitySingles))
+print(x*60*60)
+print((6*4+60*6)*len(stabilitySingles)/60/60)
+plt.plot(x,stabilitySingles, color = "darkviolet")
+plt.title("Singles", size = labelSize, fontweight='bold', pad = 10)
+plt.xlabel("Time [h]", size = 24)
+plt.ylabel("Loss", size = 24)
+plt.xticks(np.arange(0, 15, 2))
+plt.yticks(np.arange(0.07, 0.105, 0.005))
+plt.tick_params(axis='both', which='major', labelsize=20, pad = 10)
+plt.tick_params(axis='both', which='minor', labelsize=20)
+plt.grid(ls='--', alpha=0.3)
+#plt.savefig('./Immagini/stability_singles.pdf')  # Salva la figura per Frob_17
+plt.show()
+#plt.xaxis.set_major_locator(plt.MaxNLocator(6))
+#axs[0].yaxis.set_major_locator(plt.MaxNLocator(5))
+
+x = np.linspace(0,14, len(stabilityDoubles))
+plt.plot(x, stabilityDoubles, color = "darkviolet")
+#plt].text( -0.25, 0.95,'b', transform=axs[1].transAxes, size = labelSize, fontweight='bold')
+plt.title("Doubles", size = labelSize, fontweight='bold', pad = 10)
+plt.xlabel("Time [h]", size = 24)
+plt.ylabel("Loss", size = 24)
+plt.tick_params(axis='both', which='major', labelsize=20, pad = 10)
+plt.tick_params(axis='both', which='minor', labelsize=20)
+plt.grid(ls='--', alpha=0.3)
+plt.xticks(np.arange(0, 15, 2))
+plt.yticks(np.arange(0.17, 0.24, 0.01))
+#plt.savefig('./Immagini/stability_doubles.pdf')  # Salva la figura per Frob_17
+plt.show()
+# %%
+target_1 = np.array([0.076,0.090,0.085])
+days_1 = np.array([9, 16, 20])
+
+all_0 = np.array([0.054, 0.055])
+days_0 = np.array([7, 14])
+
+plt.scatter(days_1, target_1, marker='o', label='target 1')
+plt.scatter(days_0, all_0, marker='x', label='all 0')
