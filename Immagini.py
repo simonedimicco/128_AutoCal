@@ -186,14 +186,15 @@ with np.load(os.path.join(path, "2026-06-16_05-34-24_128modi_LossLandscape_targe
     lossLandscapeSingles_S32D6 = temp["arr_1"]
     lossLandscapeDoubles_S32D6 = temp["arr_2"]
 
-
+x= np.linspace(2,62, len(lossLandscapeSingles_S1D6))
+x_ticks = np.linspace(2,62, 7)
 #%%
 colorsArray = ["darkviolet", "orange", "green", "red"]
 
 
-plt.plot(lossLandscapeSingles_S1D6, color = colorsArray[0], label='long duration')
-plt.plot(lossLandscapeSingles_S1D1, color = colorsArray[1], label='short duration')
-plt.plot(lossLandscapeSingles_S32D6, color = colorsArray[2], label='random start')
+plt.plot(x,lossLandscapeSingles_S1D6, color = colorsArray[0], label='long duration')
+plt.plot(x,lossLandscapeSingles_S1D1, color = colorsArray[1], label='short duration')
+plt.plot(x,lossLandscapeSingles_S32D6, color = colorsArray[2], label='random start')
 #plt.text( -0.25, 0.95,'a', transform=plt.gca().transAxes, size = 20, fontweight='bold')
 plt.title("Singles", size = 16, fontweight='bold', pad = 10)
 plt.xlabel("$V^2$", size = 16)
@@ -202,13 +203,14 @@ plt.tick_params(axis='both', which='major', labelsize=16, pad = 10)
 plt.tick_params(axis='both', which='minor', labelsize=16)
 plt.grid(ls='--', alpha=0.3)
 plt.tight_layout()
+plt.xticks(x_ticks)
 plt.legend(fontsize=16, loc='lower left')
 plt.savefig('./Immagini/loss_landscape_singles.pdf')  # Salva la figura per Frob_17
 plt.show()
 #%%
-plt.plot(lossLandscapeDoubles_S1D6, color = colorsArray[0])
-plt.plot(lossLandscapeDoubles_S1D1, color = colorsArray[1])
-plt.plot(lossLandscapeDoubles_S32D6, color = colorsArray[2])
+plt.plot(x,lossLandscapeDoubles_S1D6, color = colorsArray[0])
+plt.plot(x,lossLandscapeDoubles_S1D1, color = colorsArray[1])
+plt.plot(x,lossLandscapeDoubles_S32D6, color = colorsArray[2])
 #plt.text( -0.25, 0.95,'b', transform=axs[0,1].transAxes, size = labelSize, fontweight='bold')
 plt.title("Doubles", size = 16, fontweight='bold', pad = 10)
 plt.xlabel("$V^2$", size = 16)
@@ -217,13 +219,15 @@ plt.tick_params(axis='both', which='major', labelsize=16, pad = 10)
 plt.tick_params(axis='both', which='minor', labelsize=16)
 plt.grid(ls='--', alpha=0.3)
 plt.tight_layout()
+plt.xticks(x_ticks)
 plt.savefig('./Immagini/loss_landscape_doubles.pdf')  # Salva la figura per Frob_17
 #axs[1].set_xticks([0.1, 0.01, 0.001, 0.0001])
 
 plt.show()
 #%%
 
-plt.plot(lossLandscapeSingles_S32D6, color = colorsArray[2])
+plt.plot(x,lossLandscapeSingles_S32D6, color = colorsArray[2])
+plt.xticks(x_ticks)
 #plt.text( -0.25, 0.95,'c', transform=axs[1,0].transAxes, size = labelSize, fontweight='bold')
 # plt.xlabel("$V^2$", size = 24)
 # plt.ylabel("Loss", size = 24)
@@ -235,13 +239,13 @@ plt.grid(ls='--', alpha=0.3)
 plt.savefig('./Immagini/loss_landscape_singles_S32D6.pdf')  # Salva la figura per Frob_17
 plt.show()
 #%%
-plt.plot(lossLandscapeDoubles_S32D6, color = colorsArray[2])
+plt.plot(x,lossLandscapeDoubles_S32D6, color = colorsArray[2])
 #plt.text( -0.25, 0.95,'d', transform=axs[1,1].transAxes, size = labelSize, fontweight='bold')
 # plt.xlabel("$V^2$", size = 24)
 # plt.ylabel("Loss", size = 24)
 plt.tick_params(axis='both', which='major', labelsize=24, pad = 10)
 plt.tick_params(axis='both', which='minor', labelsize=24)
-
+plt.xticks(x_ticks)
 plt.tight_layout()
 plt.grid(ls='--', alpha=0.3)
 plt.savefig('./Immagini/loss_landscape_doubles_S32D6.pdf')  # Salva la figura per Frob_17
