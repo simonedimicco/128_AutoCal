@@ -21,8 +21,8 @@ def comp_MyNorm(pred, target):
     return 0.5*(np.sum(np.abs(pred - target)))
 
 path  = '/media/dati_2'
-folder_1 = 'DATI_2026_04_14_ricostruzioni_ripetute/measuremente_4'
-folder_2 = 'DATI_2026_04_14_ricostruzioni_ripetute/measuremente_3'
+folder_1 = 'DATI_2026_06_12_misure_multiple/all_0'
+folder_2 = 'DATI_2026_06_05_misure_multiple/all_0'
 #folder_2 = 'DATI_2026_05_19_misure_multiple/target1'
 subfolder = 'Ricostruzione_unitaria'
 file_name = 'Unitary_mat.npz'
