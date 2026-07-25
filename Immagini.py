@@ -268,3 +268,85 @@ plt.plot(lossSingles, linewidth=4, color = "darkviolet", label='Singles')
 plt.savefig('./Immagini/Loss.pdf')  # Salva la figura per Frob_17
 #plt.plot(lossDoubles)
 # %%
+
+#%%
+
+epsilon   = np.array([0.030, 0.040, 0.055, 0.075, 0.100, 0.120])
+fid_avg   = np.array([0.9435, 0.9011, 0.8186, 0.6808, 0.4828, 0.3219])
+fid_sigma = np.array([0.0006, 0.0011, 0.0019, 0.0031, 0.0045, 0.0053])
+L1_avg    = np.array([5.48, 7.24, 9.82, 13.02, 16.56, 18.98])
+L1_sigma  = np.array([0.14, 0.19, 0.25, 0.32, 0.40, 0.43])
+
+common_style = dict(fmt='o', color='#1f77b4', ecolor='#1f77b4',
+                     elinewidth=1.2, capsize=4, markersize=6,
+                     markeredgecolor='black', markeredgewidth=0.5)
+
+# 1) epsilon vs Fidelity, errore su y
+fig1, ax1 = plt.subplots(figsize=(6, 5))
+ax1.errorbar(epsilon, fid_avg, yerr=fid_sigma, **common_style)
+ax1.set_xlabel(r'$\epsilon$', fontsize=13)
+ax1.set_ylabel('Fidelity', fontsize=13)
+ax1.set_title(r'Fidelity vs. $\epsilon$', fontsize=13)
+ax1.grid(True, linestyle='--', alpha=0.5)
+fig1.tight_layout()
+fig1.savefig('./Immagini/fidelity_vs_epsilon.pdf')
+# fig1.savefig('fidelity_vs_epsilon.png', dpi=200)
+
+# 2) epsilon vs L1, errore su y
+fig2, ax2 = plt.subplots(figsize=(6, 5))
+
+ax2.errorbar(epsilon, L1_avg, yerr=L1_sigma, **common_style)
+ax2.set_xlabel(r'$\epsilon$', fontsize=24)
+ax2.set_ylabel(r'$L^1_{norm}$', fontsize=24)
+ax2.set_title(r'$L^1_{norm}$ vs. $\epsilon$', fontsize=24)
+ax2.grid(True, linestyle='--', alpha=0.5)
+fig2.tight_layout()
+fig2.savefig('./Immagini/L1_vs_epsilon.pdf')
+# fig2.savefig('L1_vs_epsilon.png', dpi=200)
+
+# 3) L1 vs Fidelity, errore su x e y
+# 3) Fidelity vs L1, errore su x e y, un colore per ogni epsilon
+fig3, ax3 = plt.subplots(figsize=(8, 6))
+colors = plt.cm.tab10(np.linspace(0, 1, len(epsilon)))
+for eps, x, y, xerr, yerr, c in zip(epsilon, fid_avg, L1_avg,
+                                     fid_sigma, L1_sigma, colors):
+    ax3.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='o', color=c,
+                 ecolor=c, elinewidth=3, capsize=6, markersize=9,
+                 markeredgecolor='black', markeredgewidth=1,
+                 label=fr'$\epsilon = {eps:.3f}$')
+
+ax3.set_xlabel('Fidelity', fontsize=24)
+ax3.set_ylabel(r'$L^1_{norm}$', fontsize=24)
+ax3.set_title(r'$L^1_{norm}$ vs. Fidelity', fontsize=24)
+ax3.grid(True, linestyle='--', alpha=0.5)
+ax3.legend(fontsize=16)
+
+ax3.tick_params(axis='x', labelsize=22)
+ax3.tick_params(axis='y', labelsize=22)
+fig3.tight_layout()
+fig3.savefig('./Immagini/L1_vs_fidelity.pdf')
+plt.show()
+print("done")
+    # %%
+colors = plt.cm.tab10(np.linspace(0, 1, len(epsilon)))
+
+plt.figure(figsize=(6, 5))
+
+for eps, x, y, xerr, yerr, c in zip(epsilon, fid_avg, L1_avg,fid_sigma, L1_sigma, colors):
+    plt.errorbar(x, y, xerr=xerr, yerr=yerr, fmt='o', color=c,
+                 ecolor=c, elinewidth=1.2, capsize=4, markersize=7,
+                 markeredgecolor='black', markeredgewidth=1,
+                 label=fr'$\epsilon = {eps:.3f}$')
+
+plt.xlabel('Fidelity', fontsize=24)
+plt.ylabel(r'$L^1_{norm}$', fontsize=24)
+plt.title(r'$L^1_{norm}$ vs. Fidelity', fontsize=24)
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.legend(fontsize=16)
+plt.xticks(fontsize=22)
+plt.yticks(fontsize=22)
+plt.tight_layout()
+#plt.savefig('L1_vs_fidelity.pdf')
+plt.savefig('./Immagini/L1_vs_fidelity.pdf')
+plt.show()
+# %%
