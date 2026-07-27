@@ -122,7 +122,7 @@ with np.load("/media/dati_2/results/2026-06-15_02-28-13_128modi_stability_T1N_du
 #%%
 colorsArray = ["darkviolet", "orange", "green", "red"]
 
-labelSize = 28
+labelSize = 20
 
 # fig, axs = plt.subplots(2, 1, dpi=200, figsize=(6, 11))
 
@@ -134,12 +134,12 @@ print(x*60*60)
 print((6*4+60*6)*len(stabilitySingles)/60/60)
 plt.plot(x,stabilitySingles, color = "darkviolet")
 plt.title("Singles", size = labelSize, fontweight='bold', pad = 10)
-plt.xlabel("Time [h]", size = 24)
-plt.ylabel("Loss", size = 24)
+plt.xlabel("Time [h]", size = 16)
+plt.ylabel("Loss", size = 16)
 plt.xticks(np.arange(0, 15, 2))
 plt.yticks(np.arange(0.07, 0.105, 0.005))
-plt.tick_params(axis='both', which='major', labelsize=20, pad = 10)
-plt.tick_params(axis='both', which='minor', labelsize=20)
+plt.tick_params(axis='both', which='major', labelsize=16, pad = 10)
+plt.tick_params(axis='both', which='minor', labelsize=16)
 plt.grid(ls='--', alpha=0.3)
 plt.tight_layout()
 plt.savefig('./Immagini/stability_singles.pdf')  # Salva la figura per Frob_17
@@ -151,10 +151,10 @@ x = np.linspace(0,14, len(stabilityDoubles))
 plt.plot(x, stabilityDoubles, color = "darkviolet")
 #plt].text( -0.25, 0.95,'b', transform=axs[1].transAxes, size = labelSize, fontweight='bold')
 plt.title("Doubles", size = labelSize, fontweight='bold', pad = 10)
-plt.xlabel("Time [h]", size = 24)
-plt.ylabel("Loss", size = 24)
-plt.tick_params(axis='both', which='major', labelsize=20, pad = 10)
-plt.tick_params(axis='both', which='minor', labelsize=20)
+plt.xlabel("Time [h]", size = 16)
+plt.ylabel("Loss", size = 16)
+plt.tick_params(axis='both', which='major', labelsize=16, pad = 10)
+plt.tick_params(axis='both', which='minor', labelsize=16)
 plt.grid(ls='--', alpha=0.3)
 plt.xticks(np.arange(0, 15, 2))
 plt.yticks(np.arange(0.17, 0.24, 0.01))
