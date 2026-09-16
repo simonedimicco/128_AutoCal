@@ -59,19 +59,19 @@ plt.xticks(x_18, fontsize=16)
 plt.tight_layout()
 plt.grid(ls='--', alpha=0.3)
 
-plt.savefig('./Immagini/frob_18.pdf') 
+#plt.savefig('./Immagini/frob_18.pdf') 
 plt.show()
 
 
 #%%
-plt.figure(figsize=(7.8, 4))
-plt.axhline(y=19, color='red', linestyle=':', label='random matrices')
+plt.figure(figsize=(6.65, 4))
+plt.axhline(y=19, color='red', linestyle=':', label=r'$L_{mean}^{1(rand)}$')
 plt.fill_between([0, 11], 19-1, 19+1, color='red', alpha=0.1)
 plt.xlim(0.75,10.25)
-plt.axhline(y=7.2,xmin=0, xmax=0, color='orange', linestyle=':', label='stability 18')
+plt.axhline(y=7.2,xmin=0, xmax=0, color='orange', linestyle=':', label=r'$L_{mean}^{1(18)}$')
 plt.fill_between([0, 1], 7.2-1.6, 7.2+1.6, color='orange', alpha=0.1)
 plt.xlim(0.75,10.25)
-plt.axhline(y=4.2,xmin=0, xmax=1, color='green', linestyle=':', label='stability 17')
+plt.axhline(y=4.2,xmin=0, xmax=1, color='green', linestyle=':', label=r'$L_{mean}^{1(17)}$')
 plt.fill_between([0, 11], 4.2-0.6, 4.2+0.6, color='green', alpha=0.1)
 plt.scatter(x_17, frob_17_res, marker='o', label='target', c='darkviolet')
 plt.scatter(x_17, start_17_res, marker='x', label='start', c='darkviolet')
@@ -108,7 +108,7 @@ plt.ylabel('Frobenius norm')
 plt.legend()
 plt.xlim(5.75, 10.25)
 plt.xticks(x_17)
-plt.savefig('./Immagini/frob_17.pdf')  # Salva la figura per Frob_17
+#plt.savefig('./Immagini/frob_17.pdf')  # Salva la figura per Frob_17
 
 # %%
 '''
@@ -350,3 +350,5 @@ plt.tight_layout()
 plt.savefig('./Immagini/L1_vs_fidelity.pdf')
 plt.show()
 # %%
+
+np.std(x)
