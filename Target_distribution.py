@@ -4,7 +4,7 @@ from tqdm import tqdm
 from WhiteLib_lite import find_coincidences_numba, count_occurrences
 
 
-path = '/media/dati_2/DATI_2026_05_29_misure_multiple/target_6_new/Ricostruzione_unitaria'
+path = '/media/dati_2/DATI_2026_06_17_128modi_training_target1New_3Pairs_T1OldStart_1/Ricostruzione_unitaria'
 #path = 'C:/Users/ControlCenter/Desktop/128_AutoCal_dati/DATI_2026_03_30'
 singles_folder = os.path.join(path, 'Singles')
 dark_folder = os.path.join(path, 'Buio')
@@ -27,9 +27,9 @@ for i, channel in tqdm(enumerate(inputs), desc="Processing singles distributions
     B[i] = B[i]/len(files_dark)
 S = S - B
 S[S < 0] = 0
-for i in range(S.shape[0]):
-    S[i] = S[i]/np.sum(S[i])
-np.savez(os.path.join(path,'singles_distributions.npz'), distributions=S)
+# for i in range(S.shape[0]):
+#     S[i] = S[i]/np.sum(S[i])
+np.savez(os.path.join(path,'singles_distributions_unnorm.npz'), distributions=S)
 
 couples = ['bc', 'bd', 'be', 'cd', 'ce', 'de']
 shape=(128,128)
@@ -47,7 +47,7 @@ for i, couple in tqdm(enumerate(couples), desc="Processing couples distributions
             print(f"File: {file},\tCoincidences found: {len(coincidences)}")
             C[i] += count_occurrences(shape=shape,  data=coincidences)
 
-for i in range(C.shape[0]):
-    C[i] = C[i]/(np.sum(C[i])/2)
-np.savez(os.path.join(path,'couples_distributions.npz'), distributions=C)
+# for i in range(C.shape[0]):
+#     C[i] = C[i]/(np.sum(C[i])/2)
+np.savez(os.path.join(path,'couples_distributions_unnorm.npz'), distributions=C)
             
