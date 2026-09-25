@@ -361,7 +361,7 @@ def integra_picchi(bin_edges, bin_values, pos_picchi, finestra):
 
         if len(x_sel) > 1:
             # integrazione con regola del trapezio
-            area = np.trapezoid(y_sel, x_sel)
+            area = np.trapz(y_sel, x_sel)
             pos_out.append(int(pos))
             integrali.append(area)
 

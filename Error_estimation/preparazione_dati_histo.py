@@ -1,6 +1,7 @@
+#%%
 import numpy as np
 from scipy.optimize import minimize
-
+import os
 from itertools import combinations
 import matplotlib.pyplot as plt
 from os.path import join
@@ -12,9 +13,12 @@ from visibility_HOM_lib import *
  
 #%%
 
-data_path = '/media/dati_2/DATI_2026_06_21_128modi_training_target6N_3PairsPre_32Start_2'
+data_path = '/media/dati_2/DATI_2026_05_27_misure_multiple/target_9_new'
 data_folder = 'Ricostruzione_unitaria'
 save_path = join(data_path,data_folder)
+save_path_error = os.path.join(data_path, 'error_files')
+print(save_path_error)
+os.makedirs(save_path_error, exist_ok=True)
 channels = ['b','c','d','e']
 
 
@@ -74,7 +78,7 @@ T = T.transpose()
 # Save moduliquadri_mc.npz with raw counts for MC resampling
 # Using per-channel field names as specified in data_dictionary.md
 np.savez(
-    join(save_path, 'moduliquadri_mc'),
+    join(save_path_error, 'moduliquadri_mc'),
     singles_raw_b=singles_raw['b'],
     singles_raw_c=singles_raw['c'],
     singles_raw_d=singles_raw['d'],
@@ -93,7 +97,7 @@ np.savez(
     dark_file_count_e=dark_file_counts['e']
 )
 
-np.savez(join(save_path,'moduliquadri'), T = T)
+np.savez(join(save_path_error,'moduliquadri'), T = T)
 
 
 #%%
@@ -246,7 +250,7 @@ for c in tqdm(com, 'Doppie'):
 
 
 # Save visibilities_mc.npz with all histogram data for MC resampling
-np.savez(join(save_path, 'visibilities_mc'), **visibilities_mc_data)
+np.savez(join(save_path_error, 'visibilities_mc'), **visibilities_mc_data)
 
-np.savez(join(save_path,'visibilities_from_histogram'), VV = VV)     
+np.savez(join(save_path_error,'visibilities_from_histogram'), VV = VV)     
 

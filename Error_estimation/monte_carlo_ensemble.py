@@ -22,7 +22,7 @@ import argparse
 import numpy as np
 import time
 from datetime import datetime
-
+import os
 # Import the modules from previous phases
 import mc_resampling
 import reconstruction_core
@@ -298,18 +298,20 @@ def main():
     )
     args = parser.parse_args()
     
-    # Define paths
-    # MC data files (in current directory)
-    moduliquadri_mc_path = 'moduliquadri_mc.npz'
-    visibilities_mc_path = 'visibilities_mc.npz'
     
+
     # Real data files (from data-preparation pipeline)
     # These are in the data directory where preparazione_dati_histo.py saves them
-    data_path = '/media/dati_2/DATI_2026_06_21_128modi_training_target6N_3PairsPre_32Start_2'
-    save_folder = 'Ricostruzione_unitaria'
+    data_path = '/media/dati_2/DATI_2026_05_29_misure_multiple/all_32/'
+    save_folder = 'error_files'
     moduliquadri_path = f'{data_path}/{save_folder}/moduliquadri.npz'
     visibilities_path = f'{data_path}/{save_folder}/visibilities_from_histogram.npz'
-    
+
+    # Define paths
+    # MC data files (in current directory)
+    moduliquadri_mc_path = f'{data_path}/{save_folder}/moduliquadri_mc.npz'
+    visibilities_mc_path = f'{data_path}/{save_folder}/visibilities_mc.npz'
+
     print("=" * 70)
     print("WORK_05: Monte Carlo Ensemble Generation")
     print("=" * 70)
@@ -350,7 +352,8 @@ def main():
     results = verify_acceptance_criteria(ensemble, args.N)
     
     # Save ensemble
-    save_ensemble(ensemble, args.output)
+    output_path = os.path.join(data_path,save_folder, args.output)
+    save_ensemble(ensemble, output_path)
     
     # Final verification: check saved file
     print("\n" + "=" * 70)
@@ -358,7 +361,7 @@ def main():
     print("=" * 70)
     
     # Load and verify the saved file
-    with np.load(args.output) as f:
+    with np.load(output_path) as f:
         print(f"Saved file contains {len(f.files)} entries")
         
         # Check U_real
